@@ -1,0 +1,100 @@
+{
+  "scope": "discovery",
+  "persona": "product-manager",
+  "title": "Descoberta do produto",
+  "intro": "Preciso de contexto para escrever a PRD do app de lista de tarefas. O pedido original cobre título, descrição, label com cor, busca, ordenação e data limite com indicador; as perguntas abaixo fecham as lacunas que mais bloqueiam o escopo.",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single_choice",
+      "question": "Como os dados das tarefas devem ser armazenados?",
+      "options": [
+        "Somente no aparelho, funcionando offline (padrão sugerido)",
+        "No aparelho, com backup/restauração manual em arquivo",
+        "Na nuvem com login de conta, sincronizando entre aparelhos"
+      ],
+      "required": true
+    },
+    {
+      "id": "q2",
+      "type": "multiple_choice",
+      "question": "Quais dispositivos precisam de suporte?",
+      "options": [
+        "Celular Android (padrão sugerido)",
+        "Tablet Android",
+        "Wear OS"
+      ],
+      "required": true
+    },
+    {
+      "id": "q3",
+      "type": "single_choice",
+      "question": "Uma tarefa pode ser marcada como concluída? Se sim, o que acontece com ela na lista?",
+      "options": [
+        "Sim: checkbox risca a tarefa e ela continua na lista, com opção de ocultar concluídas (padrão sugerido)",
+        "Sim: checkbox move a tarefa para uma seção/aba 'Concluídas'",
+        "Sim: checkbox remove a tarefa da lista ativa e a arquiva",
+        "Não: o app apenas cadastra e edita tarefas no MVP"
+      ],
+      "required": true
+    },
+    {
+      "id": "q4",
+      "type": "single_choice",
+      "question": "Como as labels devem funcionar?",
+      "options": [
+        "Uma label por tarefa, cor escolhida em uma paleta fixa (padrão sugerido)",
+        "Uma label por tarefa, com seletor de cor livre",
+        "Várias labels por tarefa, cor de paleta fixa",
+        "Várias labels por tarefa, com seletor de cor livre"
+      ],
+      "required": true
+    },
+    {
+      "id": "q5",
+      "type": "single_choice",
+      "question": "O app terá uma única lista ou várias listas/projetos?",
+      "options": [
+        "Uma única lista de tarefas (padrão sugerido)",
+        "Várias listas/projetos, cada um com suas tarefas"
+      ],
+      "required": true
+    },
+    {
+      "id": "q6",
+      "type": "single_choice",
+      "question": "Quais estados o indicador de proximidade da data limite deve mostrar?",
+      "options": [
+        "'Atrasada', 'Hoje', 'Amanhã' e 'Próximos 7 dias' (padrão sugerido)",
+        "'Atrasada', 'Hoje' e 'Próximos 3 dias'",
+        "Apenas 'Atrasada' e 'No prazo'"
+      ],
+      "required": true
+    },
+    {
+      "id": "q7",
+      "type": "single_choice",
+      "question": "O app deve enviar lembretes/notificações da data limite?",
+      "options": [
+        "Sem lembretes no MVP; apenas o indicador visual na tarefa (padrão sugerido)",
+        "Notificação no dia da data limite (data, sem hora)",
+        "Notificação em horário configurável pelo usuário (data + hora)"
+      ],
+      "required": true
+    },
+    {
+      "id": "q8",
+      "type": "multiple_choice",
+      "question": "Quais opções de ordenação a lista deve oferecer?",
+      "options": [
+        "Ordem alfabética do título (A-Z)",
+        "Ordem alfabética do título (Z-A)",
+        "Data de criação (mais recente primeiro)",
+        "Data de criação (mais antiga primeiro)",
+        "Data limite (mais próxima primeiro)",
+        "Data limite (mais distante primeiro)"
+      ],
+      "required": true
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "scope": "design",
+  "reason": "Loop maximo (3 iteracoes) atingido sem acordo entre designer e chaos-design.",
+  "options": [
+    "approve",
+    "request_changes",
+    "override",
+    "abort"
+  ],
+  "artifacts": [
+    ".squad/artifacts/product/PRD.md",
+    ".squad/artifacts/design/DESIGN_SPEC.md",
+    ".squad/artifacts/design/COLOR_SCHEME.md",
+    ".squad/artifacts/design/PREVIEW.html",
+    ".squad/artifacts/design/CHAOS_REVIEW.md"
+  ],
+  "summary": "Restam 3 majors: descricao sem rolagem interna coerente, banner de erro sem 'Tentar novamente' e top app bar fixa incompativel com 2 linhas a 200%.",
+  "created_at": "2026-10-30T00:39:05Z"
+}

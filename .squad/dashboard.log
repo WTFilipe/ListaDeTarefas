@@ -1,0 +1,28 @@
+2026-10-29 20:02:43.799 Uvicorn server started on 127.0.0.1:8501
+
+  You can now view your Streamlit app in your browser.
+
+  URL: http://127.0.0.1:8501
+
+  Help agents write better Streamlit apps?
+  Install the official Streamlit skills by running streamlit skills in your terminal.
+
+2026-10-29 21:28:49.275 Uvicorn server started on 127.0.0.1:8502
+
+  You can now view your Streamlit app in your browser.
+
+  URL: http://127.0.0.1:8502
+
+  Help agents write better Streamlit apps?
+  Install the official Streamlit skills by running streamlit skills in your terminal.
+
+Exception in callback _ProactorBasePipeTransport._call_connection_lost()
+handle: <Handle _ProactorBasePipeTransport._call_connection_lost()>
+Traceback (most recent call last):
+  File "C:\Users\Pichau\AppData\Local\Programs\Python\Python315\Lib\asyncio\events.py", line 94, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pichau\AppData\Local\Programs\Python\Python315\Lib\asyncio\proactor_events.py", line 167, in _call_connection_lost
+    self._sock.shutdown(socket.SHUT_RDWR)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] Foi forçado o cancelamento de uma conexão existente pelo host remoto

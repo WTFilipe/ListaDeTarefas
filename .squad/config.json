@@ -1,0 +1,11 @@
+{
+  "max_iterations": 3,
+  "branch_prefix": "squad/",
+  "base_branch": "main",
+  "repo": "",
+  "dashboard_port": 8501,
+  "android": true,
+  "debug": false,
+  "auto_resume": true,
+  "human_wait_timeout": 1800
+}

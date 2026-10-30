@@ -1,0 +1,24 @@
+{
+  "scope": "architecture",
+  "persona": "architect",
+  "title": "Perfil tecnico do app (arquitetura)",
+  "submitted_at": "2026-10-30T00:59:37Z",
+  "answers": {
+    "q1": "manter",
+    "q2": "Modulo unico :app com pacotes por camada (sem boundaries fisicas)",
+    "q3": "Recomendado - Manter minSdk 30, targetSdk 37, compileSdk 37 (como esta no projeto)",
+    "q4": "Recomendado - Hilt (KSP) com modulos por camada (default da squad)",
+    "q5": "Recomendado - Room (KSP) para tarefas e etiquetas + DataStore Preferences para ordenacao vigente e aba selecionada",
+    "q6": [
+      "Recomendado - Sem :core:network e sem nenhuma dependencia de rede (app 100% offline)",
+      "Recomendado - Sem SDK de analytics/crash remoto; eventos apenas como object AnalyticsEvents local no-op em snake_case",
+      "Recomendado - allowBackup=false e ausencia de dataExtractionRules de nuvem (nenhum dado sai do aparelho)",
+      "Recomendado - Nenhuma permissao sensivel no AndroidManifest (sem INTERNET, sem notificacoes, sem localizacao)",
+      "Recomendado - Logs apenas em build debug, sem titulo/descricao/nome de etiqueta (sem PII)"
+    ],
+    "q7": "Recomendado - MVI (State imutavel + Action + Effect one-shot) + Navigation Compose com rotas type-safe (@Serializable + kotlinx.serialization)",
+    "q8": [
+      "Recomendado - Unitarios de ViewModel/reducer/use cases com kotlinx-coroutines-test + Turbine"
+    ]
+  }
+}

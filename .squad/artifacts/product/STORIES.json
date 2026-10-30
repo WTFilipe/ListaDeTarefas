@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "stories": [
+    {
+      "id": "US-01",
+      "title": "Cadastrar, editar e excluir tarefas com persistência local",
+      "priority": 1,
+      "description": "Cadastrar tarefas com título obrigatório e descrição opcional, editar e excluir com confirmação, manter os dados no aparelho e funcionar offline, com estados de lista vazia e falha de armazenamento. Depende de: nenhuma.",
+      "acceptance_criteria": [
+        "A tela principal exibe a lista ativa e a ação 'Nova tarefa' que abre o formulário",
+        "O formulário tem título obrigatório e descrição opcional",
+        "Salvar com título vazio ou apenas espaços é bloqueado com erro inline e o formulário permanece aberto com o conteúdo digitado",
+        "Título e descrição são salvos sem espaços nas extremidades; descrição só com espaços é armazenada como vazia",
+        "Salvar uma tarefa válida persiste e insere na lista ativa respeitando a ordenação vigente: no topo com a ordenação padrão ('criação mais recente primeiro'); caso a padrão não esteja em uso, a lista permanece na ordenação vigente",
+        "Tocar na tarefa abre o formulário em edição com os dados atuais; salvar atualiza sem mudar a data de criação",
+        "Cancelar a edição/criação descarta mudanças e retorna à lista sem alterações",
+        "Excluir exige confirmação explícita e remove a tarefa da lista e do armazenamento",
+        "Após reabrir o app ou reiniciar o aparelho, as tarefas continuam disponíveis sem rede",
+        "A linha mostra título e descrição com no máximo 2 linhas cada e reticências quando exceder; sem descrição mostra só o título; o texto completo fica no formulário e é anunciado integralmente pelo TalkBack",
+        "Títulos iguais são permitidos",
+        "No primeiro uso com lista ativa vazia, exibe estado vazio com texto explicativo e ação 'Nova tarefa'",
+        "Em falha de armazenamento, exibe mensagem não técnica com ação 'Tentar novamente' e preserva o conteúdo digitado no formulário"
+      ],
+      "status": "pending",
+      "tasks": []
+    },
+    {
+      "id": "US-02",
+      "title": "Limites e contadores de texto no formulário",
+      "priority": 2,
+      "description": "Limitar título a 120 e descrição a 2000 caracteres, com contador visível em criação e edição, impedindo layout quebrado por textos longos. Depende de: US-01.",
+      "acceptance_criteria": [
+        "Título limitado a 120 caracteres com contador visível (atual/120)",
+        "Descrição limitada a 2000 caracteres com contador visível (atual/2000)",
+        "Digitação acima do limite é bloqueada e o contador permanece correto",
+        "Limites e contadores valem na criação e na edição",
+        "Colar texto acima do limite não quebra o layout e o contador reflete o valor aceito",
+        "Textos no limite continuam legíveis sem alterar a altura da linha: título e descrição com até 2 linhas cada e reticências, com texto completo no formulário e no TalkBack"
+      ],
+      "status": "pending",
+      "tasks": []
+    },
+    {
+      "id": "US-03",
+      "title": "Concluir tarefas e aba \"Concluídas\"",
+      "priority": 3,
+      "description": "Marcar tarefas como concluídas por checkbox, movendo-as para a aba 'Concluídas' com a marca 'Concluída em dd/MM/aaaa', e permitir reabrir preservando todos os dados. Depende de: US-01.",
+      "acceptance_criteria": [
+        "Cada tarefa da lista ativa exibe um checkbox com alvo de toque >= 48dp",
+        "Marcar o checkbox move a tarefa para a aba 'Concluídas' registrando data/hora de conclusão, sem apagar dados",
+        "A aba 'Concluídas' mostra título riscado e a marca textual 'Concluída em dd/MM/aaaa' (data local, sem hora)",
+        "Desmarcar devolve a tarefa à lista ativa preservando todos os dados da tarefa",
+        "Abas 'Ativas' e 'Concluídas' existem na tela principal, com 'Ativas' padrão, e a aba selecionada persiste após reabrir",
+        "Concluir ou reabrir não altera a data de criação; a posição é recalculada pela ordenação vigente (padrão até a US-07)",
+        "Aba 'Concluídas' vazia exibe estado vazio textual sem ações quebradas",
+        "Excluir tarefa concluída segue o mesmo fluxo de confirmação e de falha de armazenamento da US-01"
+      ],
+      "status": "pending",
+      "tasks": []
+    },
+    {
+      "id": "US-04",
+      "title": "Etiquetas (labels) com nome e cor de paleta fixa",
+      "priority": 4,
+      "description": "Criar, editar e excluir etiquetas com nome livre único e uma cor de paleta fixa, com estados vazios definidos, associando no máximo uma etiqueta por tarefa e exibindo chip acessível. Depende de: US-01.",
+      "acceptance_criteria": [
+        "Ação 'Etiquetas' na tela principal lista as etiquetas com nome e amostra de cor",
+        "Criar exige nome não vazio (até 30 caracteres, sem espaços nas extremidades) e cor da paleta fixa com a primeira cor pré-selecionada; não existe estado 'sem cor' e nome inválido mostra erro inline",
+        "Nomes são únicos ignorando caixa e acentos e duplicata é bloqueada com erro",
+        "A paleta fixa é um conjunto fechado definido no design, sem seletor de cor livre",
+        "Editar etiqueta (nome e cor) aplica as mesmas regras de validação e unicidade e reflete imediatamente no chip das tarefas",
+        "Excluir etiqueta com confirmação deixa as tarefas sem etiqueta, sem perda de outros dados",
+        "O formulário de tarefa permite selecionar uma etiqueta ou 'Sem etiqueta', e trocar/remover em tarefa existente",
+        "Sem etiquetas cadastradas, a tela 'Etiquetas' exibe estado vazio com texto explicativo e ação 'Criar etiqueta'",
+        "Sem etiquetas cadastradas, o seletor do formulário mostra 'Sem etiqueta' e atalho 'Criar etiqueta' que abre a criação, preservando o conteúdo já digitado ao voltar",
+        "A linha da tarefa exibe chip com cor e nome visível; a cor nunca é o único sinal e o TalkBack anuncia o nome completo quando o chip é truncado",
+        "Tarefa sem etiqueta não exibe chip nem espaço reservado vazio",
+        "Nome longo no chip é truncado com reticências sem empurrar os demais elementos da linha",
+        "Criação, edição e exclusão de etiquetas refletem imediatamente e persistem após reabrir"
+      ],
+      "status": "pending",
+      "tasks": []
+    },
+    {
+      "id": "US-05",
+      "title": "Data limite e indicador de proximidade",
+      "priority": 5,
+      "description": "Definir data limite opcional (somente data local) por tarefa e exibir indicador de proximidade calculado pela data local, com regra de recálculo sem timer. Depende de: US-01, US-03.",
+      "acceptance_criteria": [
+        "O formulário permite escolher, ver e remover a data limite (somente data, formato dd/MM/aaaa)",
+        "Tarefa sem data limite não exibe indicador de prazo",
+        "Indicador apresenta exatamente um estado: Atrasada (data anterior a hoje), Hoje (data igual a hoje), Amanhã (hoje + 1 dia), Até 7 dias (hoje + 2 a hoje + 7) ou nenhum (mais de 7 dias), calculado pela data local",
+        "Indicador combina texto e ícone e é anunciado pelo TalkBack junto ao título",
+        "Indicador é recalculado ao abrir/reabrir o app, ao retomar do segundo plano e na primeira recomposição após mudança de data, hora ou fuso; não há timer de meia-noite, então com o app aberto e ocioso o estado atualiza na primeira interação após a virada",
+        "Tarefa concluída exibe 'Concluída em dd/MM/aaaa' em vez do indicador de prazo",
+        "Data no passado é permitida e exibida como 'Atrasada'",
+        "A data limite persiste após reabrir o app"
+      ],
+      "status": "pending",
+      "tasks": []
+    },
+    {
+      "id": "US-06",
+      "title": "Busca por título e descrição",
+      "priority": 6,
+      "description": "Buscar tarefas por substring no título ou na descrição, ignorando caixa e acentos, com filtro escopado à aba visível e preservado ao voltar do formulário. Depende de: US-01, US-03.",
+      "acceptance_criteria": [
+        "Campo de busca visível com placeholder e ação de limpar na tela principal",
+        "Filtro por substring no título OU descrição, ignorando caixa e acentos e removendo espaços das extremidades",
+        "Resultados atualizam durante a digitação, sem ação de confirmar",
+        "Consulta vazia restaura a lista completa mantendo a ordenação vigente",
+        "A busca atua apenas na aba visível (Ativas ou Concluídas)",
+        "Sem resultados, exibe estado vazio contendo o texto buscado e a ação 'Limpar busca'",
+        "Limpar a busca restaura a lista completa da aba atual mantendo a ordenação vigente",
+        "A busca não altera, cria nem exclui dados",
+        "O filtro permanece ativo ao abrir e fechar o formulário de criação/edição a partir da lista, e ao retornar o resultado já reflete a criação, edição, conclusão ou reabertura"
+      ],
+      "status": "pending",
+      "tasks": []
+    },
+    {
+      "id": "US-07",
+      "title": "Ordenação da lista",
+      "priority": 7,
+      "description": "Oferecer seis opções de ordenação (título A-Z/Z-A, criação recente/antiga, prazo próximo/distante), com padrão por criação recente e preferência persistida. Depende de: US-01, US-05.",
+      "acceptance_criteria": [
+        "Seletor acessível na tela principal com as seis opções de ordenação",
+        "Ordenação padrão 'criação mais recente primeiro' na primeira abertura",
+        "Trocar a ordenação reordena imediatamente a lista visível sem perder a busca ativa",
+        "A opção escolhida persiste após reabrir o app",
+        "Ordenação por título ignora caixa e acentos (pt-BR) com desempate por criação mais recente",
+        "Ordenação por criação usa a data/hora de criação, independente de edição ou conclusão",
+        "Ordenação por data limite coloca tarefas sem data sempre ao final, em ambas as direções, com desempate por criação mais recente",
+        "A ordenação é aplicada de forma consistente nas abas 'Ativas' e 'Concluídas'",
+        "A opção selecionada fica visível (nome da ordenação atual) enquanto a lista é exibida"
+      ],
+      "status": "pending",
+      "tasks": []
+    }
+  ]
+}
