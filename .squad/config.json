@@ -5,7 +5,7 @@
   "repo": "",
   "dashboard_port": 8501,
   "android": true,
-  "debug": false,
+  "debug": true,
   "auto_resume": true,
   "human_wait_timeout": 1800
 }
