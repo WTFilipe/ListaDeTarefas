@@ -342,11 +342,25 @@ class ArchitectureRulesTest {
 
         val laterStories = setOf(
             "tab_active", "tab_completed", "search_placeholder", "sort_label",
-            "sort_sheet_title", "counter_format", "label_none", "labels_title",
+            "sort_sheet_title", "label_none", "labels_title",
             "deadline_section", "completed_on", "a11y_checkbox_completed",
         )
         val leaked = laterStories intersect declared
         assertTrue("Strings de histórias posteriores não pertencem à US-01: $leaked", leaked.isEmpty())
+    }
+
+    @Test
+    fun strings_containUs02CounterKeys() {
+        val strings = moduleDir.resolve("src/main/res/values/strings.xml")
+        assertTrue("strings.xml ausente", strings.exists())
+        val declared = Regex("""<string\s+name="([^"]+)"""")
+            .findAll(strings.readText())
+            .map { it.groupValues[1] }
+            .toSet()
+
+        val required = setOf("counter_format", "support_limit_reached")
+        val missing = required - declared
+        assertTrue("Strings da US-02 ausentes: $missing", missing.isEmpty())
     }
 
     // ------------------------------------------------------------------
