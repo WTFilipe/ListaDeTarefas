@@ -4,7 +4,8 @@ package com.foli.listadetarefas.ui.model
  * Vocabulário de apresentação da lista (`ARCHITECTURE.md` §4.1). Apenas
  * primitivos: o domínio é mapeado pela feature e o design system não conhece
  * tipos de domínio (`ui/model` não importa Compose nem domain). `completedOnDate`
- * já vem formatado como `dd/MM/aaaa` (US-03).
+ * e `deadlineDateLabel` já vêm formatados como `dd/MM/aaaa` (US-03/US-05).
+ * `deadline` é `null` quando não há indicador (sem data, concluída ou > 7 dias).
  */
 data class TaskUiModel(
     val id: String,
@@ -13,4 +14,6 @@ data class TaskUiModel(
     val label: LabelUiModel? = null,
     val isCompleted: Boolean = false,
     val completedOnDate: String? = null,
+    val deadline: DeadlineUiState? = null,
+    val deadlineDateLabel: String? = null,
 )

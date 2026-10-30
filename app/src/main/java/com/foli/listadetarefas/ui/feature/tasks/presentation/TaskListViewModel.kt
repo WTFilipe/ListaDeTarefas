@@ -6,6 +6,8 @@ import com.foli.listadetarefas.R
 import com.foli.listadetarefas.core.analytics.AnalyticsEvents
 import com.foli.listadetarefas.core.analytics.AnalyticsTracker
 import com.foli.listadetarefas.core.result.AppResult
+import com.foli.listadetarefas.core.time.TimeProvider
+import com.foli.listadetarefas.core.time.TimeSignals
 import com.foli.listadetarefas.domain.logic.TaskFilter
 import com.foli.listadetarefas.domain.model.Task
 import com.foli.listadetarefas.domain.model.TaskLabel
@@ -28,6 +30,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -43,6 +46,9 @@ import javax.inject.Inject
  * - `CompletionToggled` chama `SetTaskCompletedUseCase` (idempotente) e preserva
  *   todos os campos; em falha de armazenamento emite `ShowStorageError` com a
  *   operação exata para "Tentar novamente".
+ * - O prazo é reprojetado ao abrir, ao retomar do segundo plano, em sinais de
+ *   data/hora/fuso e a cada ação (primeira recomposição após a virada). Não há
+ *   timer de meia-noite (US-05 AC 5).
  * - O loading só aparece se a primeira emissão demorar mais de 200 ms
  *   (DESIGN_SPEC §8.2).
  */
@@ -54,6 +60,8 @@ class TaskListViewModel @Inject constructor(
     private val setTaskCompletedUseCase: SetTaskCompletedUseCase,
     private val observeUserPreferencesUseCase: ObserveUserPreferencesUseCase,
     private val setSelectedTabUseCase: SetSelectedTabUseCase,
+    private val timeProvider: TimeProvider,
+    private val timeSignals: TimeSignals,
     private val analyticsTracker: AnalyticsTracker,
 ) : ViewModel() {
 
@@ -72,6 +80,9 @@ class TaskListViewModel @Inject constructor(
     }
 
     fun onAction(action: TaskListAction) {
+        // Toda ação recalcula o prazo antes de reduzir: é a "primeira
+        // recomposição após a virada" prevista na US-05 AC 5.
+        refreshDeadlines()
         when (action) {
             is TaskListAction.TabSelected -> selectTab(action.tab)
             is TaskListAction.CompletionToggled ->
@@ -83,6 +94,7 @@ class TaskListViewModel @Inject constructor(
             TaskListAction.DeleteDismissed -> _state.update { it.copy(pendingDeleteId = null) }
             TaskListAction.DeleteConfirmed -> confirmDelete()
             TaskListAction.RetryLoadClicked -> startObserving()
+            TaskListAction.TimeRefreshRequested -> Unit
             is TaskListAction.RetryRequested -> retry(action.operation)
         }
     }
@@ -102,7 +114,8 @@ class TaskListViewModel @Inject constructor(
                 observeTasksUseCase(),
                 observeLabelsUseCase(),
                 observeUserPreferencesUseCase(),
-            ) { tasks, labels, preferences ->
+                timeSignals.signals.onStart { emit(Unit) },
+            ) { tasks, labels, preferences, _ ->
                 Triple(tasks, labels, preferences.selectedTab)
             }
                 .catch {
@@ -117,7 +130,7 @@ class TaskListViewModel @Inject constructor(
                     _state.update { current ->
                         current.copy(
                             tab = tab,
-                            rows = project(tasks, labels, tab),
+                            rows = project(tasks, labels, tab, timeProvider.today()),
                             isLoading = false,
                             loadFailed = false,
                         )
@@ -126,17 +139,37 @@ class TaskListViewModel @Inject constructor(
         }
     }
 
-    private fun project(tasks: List<Task>, labels: List<TaskLabel>, tab: TaskTab): List<TaskUiModel> {
+    private fun project(
+        tasks: List<Task>,
+        labels: List<TaskLabel>,
+        tab: TaskTab,
+        today: java.time.LocalDate,
+    ): List<TaskUiModel> {
         val labelById = labels.associateBy { it.id }
         return TaskFilter.byTab(tasks, tab).map { task ->
-            TaskUiMapper.toUiModel(task, task.labelId?.let(labelById::get))
+            TaskUiMapper.toUiModel(
+                task = task,
+                label = task.labelId?.let(labelById::get),
+                today = today,
+            )
+        }
+    }
+
+    private fun refreshDeadlines() {
+        _state.update { current ->
+            current.copy(
+                rows = project(latestTasks, latestLabels, current.tab, timeProvider.today()),
+            )
         }
     }
 
     private fun selectTab(tab: TaskTab) {
         if (_state.value.tab == tab) return
         _state.update { current ->
-            current.copy(tab = tab, rows = project(latestTasks, latestLabels, tab))
+            current.copy(
+                tab = tab,
+                rows = project(latestTasks, latestLabels, tab, timeProvider.today()),
+            )
         }
         viewModelScope.launch { setSelectedTabUseCase(tab) }
     }

@@ -3,6 +3,7 @@ package com.foli.listadetarefas.ui.feature.tasks.presentation
 import app.cash.turbine.test
 import com.foli.listadetarefas.R
 import com.foli.listadetarefas.core.analytics.NoOpAnalyticsTracker
+import com.foli.listadetarefas.core.time.TimeSignals
 import com.foli.listadetarefas.domain.model.Task
 import com.foli.listadetarefas.domain.model.TaskTab
 import com.foli.listadetarefas.domain.usecase.label.ObserveLabelsUseCase
@@ -52,6 +53,8 @@ class TaskListCompletionTest {
         ),
         observeUserPreferencesUseCase = ObserveUserPreferencesUseCase(preferences),
         setSelectedTabUseCase = SetSelectedTabUseCase(preferences),
+        timeProvider = FakeTimeProvider(nowMillisValue = 5_000L),
+        timeSignals = TimeSignals(),
         analyticsTracker = NoOpAnalyticsTracker(),
     )
 

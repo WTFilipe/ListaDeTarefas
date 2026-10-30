@@ -9,6 +9,7 @@ import com.foli.listadetarefas.core.analytics.AnalyticsTracker
 import com.foli.listadetarefas.core.palette.LabelColorKey
 import com.foli.listadetarefas.core.result.AppFailure
 import com.foli.listadetarefas.core.result.AppResult
+import com.foli.listadetarefas.core.time.TimeProvider
 import com.foli.listadetarefas.domain.logic.LabelValidator
 import com.foli.listadetarefas.domain.logic.TaskValidator
 import com.foli.listadetarefas.domain.model.TaskDraft
@@ -58,6 +59,7 @@ class TaskEditorViewModel @Inject constructor(
     private val observeTaskUseCase: ObserveTaskUseCase,
     private val observeLabelsUseCase: ObserveLabelsUseCase,
     private val createLabelUseCase: CreateLabelUseCase,
+    private val timeProvider: TimeProvider,
     private val analyticsTracker: AnalyticsTracker,
 ) : ViewModel() {
 
@@ -65,7 +67,9 @@ class TaskEditorViewModel @Inject constructor(
         ?.let(EditorMode::Edit)
         ?: EditorMode.Create(UUID.randomUUID().toString())
 
-    private val _state = MutableStateFlow(TaskEditorState(mode = mode))
+    private val _state = MutableStateFlow(
+        TaskEditorState(mode = mode, today = timeProvider.today()),
+    )
     val state: StateFlow<TaskEditorState> = _state.asStateFlow()
 
     private val _effects = Channel<TaskEditorEffect>(Channel.BUFFERED)
@@ -108,6 +112,16 @@ class TaskEditorViewModel @Inject constructor(
                 isDirty = true
                 _state.update { it.copy(selectedLabelId = action.labelId) }
             }
+            is TaskEditorAction.DueDateSelected -> {
+                isDirty = true
+                _state.update { it.copy(dueDate = action.date) }
+            }
+            TaskEditorAction.DueDateRemoved -> {
+                isDirty = true
+                _state.update { it.copy(dueDate = null) }
+            }
+            TaskEditorAction.TimeRefreshRequested ->
+                _state.update { it.copy(today = timeProvider.today()) }
             TaskEditorAction.LabelCreateShortcutClicked -> {
                 newLabelId = UUID.randomUUID().toString()
                 _state.update {
@@ -158,6 +172,7 @@ class TaskEditorViewModel @Inject constructor(
                 title = current.title,
                 description = current.description,
                 labelId = current.selectedLabelId,
+                dueDate = current.dueDate,
             )
             val result = when (current.mode) {
                 is EditorMode.Create -> createTaskUseCase(draft)
@@ -210,6 +225,7 @@ class TaskEditorViewModel @Inject constructor(
                                     title = TaskValidator.limitTitle(task.title),
                                     description = TaskValidator.limitDescription(task.description),
                                     selectedLabelId = task.labelId,
+                                    dueDate = task.dueDate,
                                     isLoading = false,
                                     taskLoadFailed = false,
                                 )
@@ -310,6 +326,7 @@ class TaskEditorViewModel @Inject constructor(
                 mapOf(
                     "has_description" to draft.description.isNotBlank(),
                     "has_label" to (draft.labelId != null),
+                    "has_deadline" to (draft.dueDate != null),
                 ),
             )
             is EditorMode.Edit -> analyticsTracker.track(

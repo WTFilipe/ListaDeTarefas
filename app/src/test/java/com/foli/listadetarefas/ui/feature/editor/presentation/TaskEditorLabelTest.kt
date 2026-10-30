@@ -47,6 +47,7 @@ class TaskEditorLabelTest {
         observeTaskUseCase = ObserveTaskUseCase(tasks),
         observeLabelsUseCase = ObserveLabelsUseCase(labels),
         createLabelUseCase = CreateLabelUseCase(labels, time),
+        timeProvider = time,
         analyticsTracker = NoOpAnalyticsTracker(),
     )
 

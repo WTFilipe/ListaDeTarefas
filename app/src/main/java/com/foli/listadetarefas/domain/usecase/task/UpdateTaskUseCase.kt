@@ -24,12 +24,11 @@ class UpdateTaskUseCase @Inject constructor(
             is AppResult.Failure -> return result
             is AppResult.Success -> result.data
         }
-        // A US-04 edita a etiqueta no formulário; o prazo (US-05) ainda não é
-        // editável e permanece o valor existente.
         val updated = existing.copy(
             title = normalized.title,
             description = normalized.description,
             labelId = draft.labelId,
+            dueDate = draft.dueDate,
         )
         return when (val write = repository.upsert(updated)) {
             is AppResult.Failure -> write

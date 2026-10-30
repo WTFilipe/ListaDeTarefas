@@ -33,6 +33,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.foli.listadetarefas.R
 import com.foli.listadetarefas.ui.designsystem.icons.AppIcons
+import com.foli.listadetarefas.ui.model.DeadlineUiState
 import com.foli.listadetarefas.ui.model.TaskUiModel
 
 /**
@@ -40,8 +41,8 @@ import com.foli.listadetarefas.ui.model.TaskUiModel
  * até 2 linhas com reticências, sem segundo texto quando não há descrição e, para
  * tarefas concluídas, título riscado + marca "Concluída em dd/MM/aaaa". A
  * semântica carrega o texto **integral** (mergeDescendants + contentDescription)
- * para que o truncamento visual não perca informação no TalkBack. O menu ⋮ expõe
- * "Editar" e "Excluir".
+ * para que o truncamento visual não perca informação no TalkBack, incluindo o
+ * estado de prazo (US-05 AC 4). O menu ⋮ expõe "Editar" e "Excluir".
  */
 @Composable
 fun TaskRow(
@@ -65,12 +66,24 @@ fun TaskRow(
     val withLabelText = labelText?.let {
         stringResource(R.string.a11y_task, baseSemanticsText, it)
     } ?: baseSemanticsText
+    val deadlineText = when (task.deadline) {
+        DeadlineUiState.OVERDUE -> task.deadlineDateLabel?.let {
+            stringResource(R.string.deadline_a11y_overdue, it)
+        } ?: stringResource(R.string.deadline_overdue)
+        DeadlineUiState.TODAY -> stringResource(R.string.deadline_a11y_today)
+        DeadlineUiState.TOMORROW -> stringResource(R.string.deadline_a11y_tomorrow)
+        DeadlineUiState.SOON -> stringResource(R.string.deadline_a11y_soon)
+        null -> null
+    }
+    val withDeadlineText = deadlineText?.let {
+        stringResource(R.string.a11y_task, withLabelText, it)
+    } ?: withLabelText
     val completedLabel = task.completedOnDate?.let {
         stringResource(R.string.completed_on_a11y, it)
     }
     val semanticsText = completedLabel?.let {
-        stringResource(R.string.a11y_task, withLabelText, it)
-    } ?: withLabelText
+        stringResource(R.string.a11y_task, withDeadlineText, it)
+    } ?: withDeadlineText
     val editLabel = stringResource(R.string.a11y_edit_task)
     val checkboxState = stringResource(
         if (task.isCompleted) R.string.a11y_checkbox_completed else R.string.a11y_checkbox_not_completed,
@@ -130,11 +143,19 @@ fun TaskRow(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            if (task.label != null || task.completedOnDate != null) {
+            if (task.label != null || task.completedOnDate != null || task.deadline != null) {
                 Row(
                     modifier = Modifier.padding(top = 4.dp),
                 ) {
                     LabelChip(label = task.label)
+                    if (task.label != null &&
+                        (task.completedOnDate != null || task.deadline != null)
+                    ) {
+                        androidx.compose.foundation.layout.Spacer(
+                            modifier = Modifier.size(4.dp),
+                        )
+                    }
+                    DeadlineBadge(deadline = task.deadline)
                     if (task.completedOnDate != null) {
                         if (task.label != null) {
                             androidx.compose.foundation.layout.Spacer(

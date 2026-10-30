@@ -28,8 +28,11 @@ import com.foli.listadetarefas.ui.designsystem.components.ActionTopAppBar
 import com.foli.listadetarefas.ui.designsystem.components.ErrorBanner
 import com.foli.listadetarefas.ui.designsystem.components.LabelEditorSheet
 import com.foli.listadetarefas.ui.designsystem.components.LabelSelectorRow
+import com.foli.listadetarefas.ui.feature.editor.presentation.components.DeadlineDatePickerDialog
 import com.foli.listadetarefas.ui.feature.editor.presentation.components.LabelSelectorSheet
+import com.foli.listadetarefas.ui.feature.editor.presentation.components.TaskDeadlineChip
 import com.foli.listadetarefas.ui.feature.editor.presentation.components.TaskFormFields
+import java.time.LocalDate
 
 /**
  * S2 stateless: corpo rolável com top app bar fixa, título obrigatório e
@@ -53,6 +56,11 @@ fun TaskEditorScreen(
     onLabelEditorSave: () -> Unit,
     onLabelEditorCancel: () -> Unit,
     onRetryLoadLabels: () -> Unit,
+    showDeadlinePicker: Boolean,
+    onDeadlineSetClick: () -> Unit,
+    onDeadlineRemove: () -> Unit,
+    onDeadlinePickerDismiss: () -> Unit,
+    onDeadlineSelected: (LocalDate) -> Unit,
     onBack: () -> Unit,
     onSave: () -> Unit,
     onRetrySave: () -> Unit,
@@ -145,6 +153,18 @@ fun TaskEditorScreen(
                 current = state.availableLabels.firstOrNull { it.id == state.selectedLabelId },
                 onClick = onLabelClick,
             )
+
+            Text(
+                text = stringResource(R.string.deadline_section),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            TaskDeadlineChip(
+                dueDate = state.dueDate,
+                onSetClick = onDeadlineSetClick,
+                onRemoveClick = onDeadlineRemove,
+                enabled = formEnabled,
+            )
         }
     }
 
@@ -167,6 +187,14 @@ fun TaskEditorScreen(
             onSelect = onLabelSelected,
             onCreateShortcut = onLabelCreateShortcut,
             onDismiss = onLabelSelectorDismiss,
+        )
+    }
+
+    if (showDeadlinePicker) {
+        DeadlineDatePickerDialog(
+            initialDate = state.dueDate ?: state.today,
+            onDateSelected = onDeadlineSelected,
+            onDismiss = onDeadlinePickerDismiss,
         )
     }
 }

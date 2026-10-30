@@ -13,5 +13,6 @@ sealed interface TaskListAction {
     data object DeleteConfirmed : TaskListAction
     data object DeleteDismissed : TaskListAction
     data object RetryLoadClicked : TaskListAction
+    data object TimeRefreshRequested : TaskListAction
     data class RetryRequested(val operation: TaskRetryOperation) : TaskListAction
 }

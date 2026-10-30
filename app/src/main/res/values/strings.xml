@@ -96,4 +96,18 @@
     <string name="color_name_blue">Azul</string>
     <string name="color_name_purple">Roxo</string>
     <string name="color_name_pink">Rosa</string>
+
+    <!-- Data limite e indicador de proximidade (US-05) -->
+    <string name="deadline_section">Data limite</string>
+    <string name="deadline_action_set">Definir data</string>
+    <string name="deadline_remove">Remover data limite</string>
+    <string name="deadline_overdue">Atrasada</string>
+    <string name="deadline_today">Hoje</string>
+    <string name="deadline_tomorrow">Amanhã</string>
+    <string name="deadline_soon">Até 7 dias</string>
+    <string name="deadline_a11y_today">Vence hoje</string>
+    <string name="deadline_a11y_tomorrow">Vence amanhã</string>
+    <string name="deadline_a11y_soon">Vence em até 7 dias</string>
+    <string name="deadline_a11y_overdue">Atrasada, venceu em %1$s</string>
+    <string name="ok">OK</string>
 </resources>

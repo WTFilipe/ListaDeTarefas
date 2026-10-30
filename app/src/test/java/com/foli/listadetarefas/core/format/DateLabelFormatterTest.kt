@@ -28,4 +28,12 @@ class DateLabelFormatterTest {
 
         assertEquals("05/01/2026", DateLabelFormatter.format(epochMillis, zone))
     }
+
+    @Test
+    fun formatDate_formatsLocalDateAsDayMonthYear() {
+        assertEquals(
+            "07/03/2027",
+            DateLabelFormatter.formatDate(LocalDate.of(2027, 3, 7)),
+        )
+    }
 }

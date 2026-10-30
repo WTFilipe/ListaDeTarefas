@@ -3,6 +3,7 @@ package com.foli.listadetarefas.ui.feature.tasks.presentation
 import app.cash.turbine.test
 import com.foli.listadetarefas.core.analytics.NoOpAnalyticsTracker
 import com.foli.listadetarefas.core.palette.LabelColorKey
+import com.foli.listadetarefas.core.time.TimeSignals
 import com.foli.listadetarefas.domain.model.Task
 import com.foli.listadetarefas.domain.model.TaskLabel
 import com.foli.listadetarefas.domain.usecase.label.ObserveLabelsUseCase
@@ -40,6 +41,8 @@ class TaskListLabelTest {
         setTaskCompletedUseCase = SetTaskCompletedUseCase(tasks, FakeTimeProvider()),
         observeUserPreferencesUseCase = ObserveUserPreferencesUseCase(preferences),
         setSelectedTabUseCase = SetSelectedTabUseCase(preferences),
+        timeProvider = FakeTimeProvider(),
+        timeSignals = TimeSignals(),
         analyticsTracker = NoOpAnalyticsTracker(),
     )
 

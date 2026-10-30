@@ -30,6 +30,7 @@ fun TaskEditorRoute(
     val snackbarHostState = remember { SnackbarHostState() }
     val resources = LocalResources.current
     var showLabelSelector by rememberSaveable { mutableStateOf(false) }
+    var showDeadlinePicker by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(viewModel, resources) {
         viewModel.effects.collect { effect ->
@@ -71,6 +72,14 @@ fun TaskEditorRoute(
         onLabelEditorSave = { viewModel.onAction(TaskEditorAction.LabelEditorSaveClicked) },
         onLabelEditorCancel = { viewModel.onAction(TaskEditorAction.LabelEditorCancelClicked) },
         onRetryLoadLabels = { viewModel.onAction(TaskEditorAction.RetryLoadLabelsClicked) },
+        showDeadlinePicker = showDeadlinePicker,
+        onDeadlineSetClick = { showDeadlinePicker = true },
+        onDeadlineRemove = { viewModel.onAction(TaskEditorAction.DueDateRemoved) },
+        onDeadlinePickerDismiss = { showDeadlinePicker = false },
+        onDeadlineSelected = { date ->
+            showDeadlinePicker = false
+            viewModel.onAction(TaskEditorAction.DueDateSelected(date))
+        },
         onBack = onNavigateBack,
         onSave = { viewModel.onAction(TaskEditorAction.SaveClicked) },
         onRetrySave = { viewModel.onAction(TaskEditorAction.RetrySaveClicked) },

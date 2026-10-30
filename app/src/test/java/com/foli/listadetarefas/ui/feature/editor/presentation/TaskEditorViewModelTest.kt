@@ -51,6 +51,7 @@ class TaskEditorViewModelTest {
             observeTaskUseCase = ObserveTaskUseCase(repository),
             observeLabelsUseCase = ObserveLabelsUseCase(labelRepository),
             createLabelUseCase = CreateLabelUseCase(labelRepository, timeProvider),
+            timeProvider = timeProvider,
             analyticsTracker = NoOpAnalyticsTracker(),
         )
     }

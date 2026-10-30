@@ -10,6 +10,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.foli.listadetarefas.R
 import com.foli.listadetarefas.ui.designsystem.components.TaskRow
 import com.foli.listadetarefas.ui.feature.tasks.presentation.components.DeleteTaskDialog
+import com.foli.listadetarefas.ui.model.DeadlineUiState
 import com.foli.listadetarefas.ui.model.TaskUiModel
 import com.foli.listadetarefas.ui.theme.ListaDeTarefasTheme
 import org.junit.Assert.assertTrue
@@ -102,6 +103,60 @@ class TaskRowSemanticsTest {
         composeRule.onNodeWithContentDescription(expected).assertIsDisplayed()
         composeRule
             .onNodeWithText(context.getString(R.string.completed_on, "12/11/2026"))
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun overdueRow_announcesDeadlineTogetherWithTitle() {
+        composeRule.setContent {
+            ListaDeTarefasTheme {
+                TaskRow(
+                    task = TaskUiModel(
+                        id = "id-3",
+                        title = "Comprar leite",
+                        description = "No mercado",
+                        deadline = DeadlineUiState.OVERDUE,
+                        deadlineDateLabel = "29/10/2026",
+                    ),
+                    onClick = {},
+                    onEdit = {},
+                    onDelete = {},
+                    onToggle = {},
+                )
+            }
+        }
+
+        val expected = context.getString(
+            R.string.a11y_task,
+            context.getString(R.string.a11y_task, "Comprar leite", "No mercado"),
+            context.getString(R.string.deadline_a11y_overdue, "29/10/2026"),
+        )
+        composeRule.onNodeWithContentDescription(expected).assertIsDisplayed()
+        composeRule.onNodeWithText(context.getString(R.string.deadline_overdue)).assertIsDisplayed()
+    }
+
+    @Test
+    fun completedRow_doesNotShowDeadlineBadge() {
+        composeRule.setContent {
+            ListaDeTarefasTheme {
+                TaskRow(
+                    task = TaskUiModel(
+                        id = "id-4",
+                        title = "Concluída",
+                        description = "",
+                        isCompleted = true,
+                        completedOnDate = "12/11/2026",
+                    ),
+                    onClick = {},
+                    onEdit = {},
+                    onDelete = {},
+                    onToggle = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithText(context.getString(R.string.deadline_overdue)).assertDoesNotExist()
+        composeRule.onNodeWithText(context.getString(R.string.completed_on, "12/11/2026"))
             .assertIsDisplayed()
     }
 
