@@ -26,4 +26,8 @@ interface TaskDao {
 
     @Query("DELETE FROM task WHERE id = :id")
     suspend fun deleteById(id: String)
+
+    /** Conclusão/reabertura idempotente: altera apenas `completed_at` (US-03). */
+    @Query("UPDATE task SET completed_at = :completedAt WHERE id = :id")
+    suspend fun setCompleted(id: String, completedAt: Long?)
 }

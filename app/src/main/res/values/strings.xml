@@ -38,10 +38,26 @@
     <string name="storage_delete_error_message">Não foi possível excluir. Tente novamente.</string>
     <string name="task_load_error">Não foi possível carregar a tarefa.</string>
 
+    <!-- Abas e conclusao (S1, US-03) -->
+    <string name="tab_active">Ativas</string>
+    <string name="tab_completed">Concluídas</string>
+    <string name="empty_completed_title">Nada concluído ainda</string>
+    <string name="empty_completed_body">As tarefas que você concluir aparecem aqui.</string>
+    <string name="completed_on">Concluída em %1$s</string>
+    <string name="completed_on_a11y">Concluída em %1$s</string>
+
     <!-- Acessibilidade (US-01) -->
     <string name="a11y_more_options">Mais opções da tarefa</string>
     <string name="a11y_loading_tasks">Carregando tarefas</string>
     <string name="a11y_edit_task">Editar tarefa</string>
     <string name="a11y_task">%1$s. %2$s</string>
     <string name="a11y_back">Voltar</string>
+
+    <!-- Acessibilidade (US-03) -->
+    <string name="a11y_checkbox_completed">Concluída</string>
+    <string name="a11y_checkbox_not_completed">Não concluída</string>
+    <string name="a11y_mark_completed">Marcar como concluída</string>
+    <string name="a11y_reopen">Reabrir tarefa</string>
+    <string name="a11y_switch_tab_active">Alternar para a aba Ativas</string>
+    <string name="a11y_switch_tab_completed">Alternar para a aba Concluídas</string>
 </resources>

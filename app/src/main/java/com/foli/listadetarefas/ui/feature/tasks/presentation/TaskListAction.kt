@@ -1,7 +1,11 @@
 package com.foli.listadetarefas.ui.feature.tasks.presentation
 
+import com.foli.listadetarefas.domain.model.TaskTab
+
 /** Intenções da S1. */
 sealed interface TaskListAction {
+    data class TabSelected(val tab: TaskTab) : TaskListAction
+    data class CompletionToggled(val taskId: String, val isCompleted: Boolean) : TaskListAction
     data class TaskClicked(val taskId: String) : TaskListAction
     data object NewTaskClicked : TaskListAction
     data class DeleteRequested(val taskId: String) : TaskListAction

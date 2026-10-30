@@ -6,8 +6,14 @@ import com.foli.listadetarefas.R
 import com.foli.listadetarefas.core.analytics.AnalyticsEvents
 import com.foli.listadetarefas.core.analytics.AnalyticsTracker
 import com.foli.listadetarefas.core.result.AppResult
+import com.foli.listadetarefas.domain.logic.TaskFilter
+import com.foli.listadetarefas.domain.model.Task
+import com.foli.listadetarefas.domain.model.TaskTab
+import com.foli.listadetarefas.domain.usecase.preferences.ObserveUserPreferencesUseCase
+import com.foli.listadetarefas.domain.usecase.preferences.SetSelectedTabUseCase
 import com.foli.listadetarefas.domain.usecase.task.DeleteTaskUseCase
 import com.foli.listadetarefas.domain.usecase.task.ObserveTasksUseCase
+import com.foli.listadetarefas.domain.usecase.task.SetTaskCompletedUseCase
 import com.foli.listadetarefas.ui.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -18,20 +24,32 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * ViewModel MVI da S1. Observa a lista ativa já ordenada pela ordenação vigente
- * (`ObserveTasksUseCase`), expõe estado imutável e efeitos one-shot. O loading só
- * aparece se a primeira emissão demorar mais de 200 ms (DESIGN_SPEC §8.2).
+ * ViewModel MVI da S1.
+ *
+ * - Combina a observação de tarefas (todas, já ordenadas) com as preferências
+ *   persistidas (aba selecionada) e projeta as linhas por aba.
+ * - `TabSelected` atualiza o estado imediatamente e persiste em DataStore; a
+ *   aba selecionada é restaurada ao reabrir o app.
+ * - `CompletionToggled` chama `SetTaskCompletedUseCase` (idempotente) e preserva
+ *   todos os campos; em falha de armazenamento emite `ShowStorageError` com a
+ *   operação exata para "Tentar novamente".
+ * - O loading só aparece se a primeira emissão demorar mais de 200 ms
+ *   (DESIGN_SPEC §8.2).
  */
 @HiltViewModel
 class TaskListViewModel @Inject constructor(
     private val observeTasksUseCase: ObserveTasksUseCase,
     private val deleteTaskUseCase: DeleteTaskUseCase,
+    private val setTaskCompletedUseCase: SetTaskCompletedUseCase,
+    private val observeUserPreferencesUseCase: ObserveUserPreferencesUseCase,
+    private val setSelectedTabUseCase: SetSelectedTabUseCase,
     private val analyticsTracker: AnalyticsTracker,
 ) : ViewModel() {
 
@@ -42,6 +60,7 @@ class TaskListViewModel @Inject constructor(
     val effects: Flow<TaskListEffect> = _effects.receiveAsFlow()
 
     private var observeJob: Job? = null
+    private var latestTasks: List<Task> = emptyList()
 
     init {
         startObserving()
@@ -49,6 +68,9 @@ class TaskListViewModel @Inject constructor(
 
     fun onAction(action: TaskListAction) {
         when (action) {
+            is TaskListAction.TabSelected -> selectTab(action.tab)
+            is TaskListAction.CompletionToggled ->
+                toggleCompletion(action.taskId, action.isCompleted)
             is TaskListAction.TaskClicked -> emitEffect(TaskListEffect.NavigateToEditor(action.taskId))
             TaskListAction.NewTaskClicked -> emitEffect(TaskListEffect.NavigateToEditor(null))
             is TaskListAction.DeleteRequested -> _state.update { it.copy(pendingDeleteId = action.taskId) }
@@ -70,22 +92,54 @@ class TaskListViewModel @Inject constructor(
                     _state.update { it.copy(isLoading = true) }
                 }
             }
-            observeTasksUseCase()
+            combine(
+                observeTasksUseCase(),
+                observeUserPreferencesUseCase(),
+            ) { tasks, preferences -> tasks to preferences.selectedTab }
                 .catch {
                     slowLoadingJob.cancel()
                     _state.update { current -> current.copy(isLoading = false, loadFailed = true) }
                 }
-                .collect { tasks ->
+                .collect { (tasks, tab) ->
                     firstEmissionReceived = true
                     slowLoadingJob.cancel()
+                    latestTasks = tasks
                     _state.update { current ->
                         current.copy(
-                            rows = tasks.map(TaskUiMapper::toUiModel),
+                            tab = tab,
+                            rows = project(tasks, tab),
                             isLoading = false,
                             loadFailed = false,
                         )
                     }
                 }
+        }
+    }
+
+    private fun project(tasks: List<Task>, tab: TaskTab) =
+        TaskFilter.byTab(tasks, tab).map { task -> TaskUiMapper.toUiModel(task) }
+
+    private fun selectTab(tab: TaskTab) {
+        if (_state.value.tab == tab) return
+        _state.update { current ->
+            current.copy(tab = tab, rows = project(latestTasks, tab))
+        }
+        viewModelScope.launch { setSelectedTabUseCase(tab) }
+    }
+
+    private fun toggleCompletion(taskId: String, isCompleted: Boolean) {
+        viewModelScope.launch {
+            when (val result = setTaskCompletedUseCase(taskId, isCompleted)) {
+                is AppResult.Success -> analyticsTracker.track(
+                    if (isCompleted) AnalyticsEvents.TASK_COMPLETED else AnalyticsEvents.TASK_REOPENED,
+                )
+                is AppResult.Failure -> emitEffect(
+                    TaskListEffect.ShowStorageError(
+                        message = UiText.Res(R.string.storage_error_message),
+                        operation = TaskRetryOperation.ToggleCompletion(taskId, isCompleted),
+                    ),
+                )
+            }
         }
     }
 
@@ -112,6 +166,8 @@ class TaskListViewModel @Inject constructor(
     private fun retry(operation: TaskRetryOperation) {
         when (operation) {
             is TaskRetryOperation.DeleteTask -> performDelete(operation.taskId)
+            is TaskRetryOperation.ToggleCompletion ->
+                toggleCompletion(operation.taskId, operation.isCompleted)
         }
     }
 

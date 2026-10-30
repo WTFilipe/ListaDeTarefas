@@ -7,4 +7,5 @@ package com.foli.listadetarefas.ui.feature.tasks.presentation
  */
 sealed interface TaskRetryOperation {
     data class DeleteTask(val taskId: String) : TaskRetryOperation
+    data class ToggleCompletion(val taskId: String, val isCompleted: Boolean) : TaskRetryOperation
 }

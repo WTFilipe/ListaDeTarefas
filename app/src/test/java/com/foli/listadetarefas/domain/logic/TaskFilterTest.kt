@@ -1,6 +1,7 @@
 package com.foli.listadetarefas.domain.logic
 
 import com.foli.listadetarefas.domain.model.Task
+import com.foli.listadetarefas.domain.model.TaskTab
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -30,5 +31,23 @@ class TaskFilterTest {
         val result = TaskFilter.active(listOf(task("a", completedAt = 1L)))
 
         assertEquals(emptyList<Task>(), result)
+    }
+
+    @Test
+    fun completed_keepsOnlyCompletedTasks() {
+        val active = task("a")
+        val completed = task("b", completedAt = 10L)
+
+        val result = TaskFilter.completed(listOf(active, completed))
+
+        assertEquals(listOf("b"), result.map { it.id })
+    }
+
+    @Test
+    fun byTab_activeAndCompletedAreComplementary() {
+        val tasks = listOf(task("a"), task("b", completedAt = 1L), task("c"))
+
+        assertEquals(listOf("a", "c"), TaskFilter.byTab(tasks, TaskTab.ACTIVE).map { it.id })
+        assertEquals(listOf("b"), TaskFilter.byTab(tasks, TaskTab.COMPLETED).map { it.id })
     }
 }

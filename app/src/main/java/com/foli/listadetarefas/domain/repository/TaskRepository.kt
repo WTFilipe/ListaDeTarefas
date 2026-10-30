@@ -14,4 +14,10 @@ interface TaskRepository {
     suspend fun getTaskById(id: String): AppResult<Task?>
     suspend fun upsert(task: Task): AppResult<Unit>
     suspend fun deleteById(id: String): AppResult<Unit>
+
+    /**
+     * Atualiza somente `completedAt` (US-03). `null` reabre a tarefa. A operação
+     * é idempotente e não toca em `createdAt` nem no conteúdo.
+     */
+    suspend fun setCompleted(id: String, completedAt: Long?): AppResult<Unit>
 }

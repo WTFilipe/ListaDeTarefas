@@ -17,6 +17,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
@@ -24,12 +26,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalResources
 import com.foli.listadetarefas.R
+import com.foli.listadetarefas.domain.model.TaskTab
 import com.foli.listadetarefas.ui.UiText
 import com.foli.listadetarefas.ui.designsystem.components.ActionTopAppBar
 import com.foli.listadetarefas.ui.designsystem.components.EmptyState
@@ -75,6 +80,10 @@ fun TaskListRoute(
     TaskListScreen(
         state = state,
         snackbarHostState = snackbarHostState,
+        onTabSelected = { tab -> viewModel.onAction(TaskListAction.TabSelected(tab)) },
+        onCompletionToggled = { taskId, isCompleted ->
+            viewModel.onAction(TaskListAction.CompletionToggled(taskId, isCompleted))
+        },
         onNewTask = { viewModel.onAction(TaskListAction.NewTaskClicked) },
         onTaskClick = { taskId -> viewModel.onAction(TaskListAction.TaskClicked(taskId)) },
         onEditTask = { taskId -> viewModel.onAction(TaskListAction.TaskClicked(taskId)) },
@@ -89,6 +98,8 @@ fun TaskListRoute(
 private fun TaskListScreen(
     state: TaskListState,
     snackbarHostState: SnackbarHostState,
+    onTabSelected: (TaskTab) -> Unit,
+    onCompletionToggled: (String, Boolean) -> Unit,
     onNewTask: () -> Unit,
     onTaskClick: (String) -> Unit,
     onEditTask: (String) -> Unit,
@@ -97,14 +108,19 @@ private fun TaskListScreen(
     onDeleteDismiss: () -> Unit,
     onRetryLoad: () -> Unit,
 ) {
-    val hasEmptyActiveList = state.rows.isEmpty() && !state.isLoading && !state.loadFailed
+    val isActiveTabEmpty = state.rows.isEmpty() &&
+        !state.isLoading &&
+        !state.loadFailed &&
+        state.tab == TaskTab.ACTIVE
+    val showFab = !isActiveTabEmpty
+
     Scaffold(
         topBar = {
             ActionTopAppBar(title = stringResource(R.string.task_list_title))
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
-            if (!hasEmptyActiveList) {
+            if (showFab) {
                 ExtendedFloatingActionButton(
                     onClick = onNewTask,
                     icon = {
@@ -125,6 +141,11 @@ private fun TaskListScreen(
                 .fillMaxSize()
                 .padding(innerPadding),
         ) {
+            TaskTabs(
+                selectedTab = state.tab,
+                onTabSelected = onTabSelected,
+            )
+
             if (state.loadFailed) {
                 ErrorBanner(
                     message = UiText.Res(R.string.task_load_error),
@@ -145,13 +166,21 @@ private fun TaskListScreen(
                     }
                 }
             } else if (state.rows.isEmpty()) {
-                EmptyState(
-                    title = stringResource(R.string.empty_active_title),
-                    body = stringResource(R.string.empty_active_body),
-                    actionLabel = stringResource(R.string.new_task),
-                    onAction = onNewTask,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                if (state.tab == TaskTab.ACTIVE) {
+                    EmptyState(
+                        title = stringResource(R.string.empty_active_title),
+                        body = stringResource(R.string.empty_active_body),
+                        actionLabel = stringResource(R.string.new_task),
+                        onAction = onNewTask,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                } else {
+                    EmptyState(
+                        title = stringResource(R.string.empty_completed_title),
+                        body = stringResource(R.string.empty_completed_body),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
@@ -163,6 +192,9 @@ private fun TaskListScreen(
                             onClick = { onTaskClick(task.id) },
                             onEdit = { onEditTask(task.id) },
                             onDelete = { onDeleteRequest(task.id) },
+                            onToggle = { isCompleted ->
+                                onCompletionToggled(task.id, isCompleted)
+                            },
                         )
                     }
                 }
@@ -174,6 +206,40 @@ private fun TaskListScreen(
         DeleteTaskDialog(
             onConfirm = onDeleteConfirm,
             onDismiss = onDeleteDismiss,
+        )
+    }
+}
+
+@Composable
+private fun TaskTabs(
+    selectedTab: TaskTab,
+    onTabSelected: (TaskTab) -> Unit,
+) {
+    val activeDescription = stringResource(R.string.a11y_switch_tab_active)
+    val completedDescription = stringResource(R.string.a11y_switch_tab_completed)
+
+    TabRow(selectedTabIndex = selectedTab.ordinal) {
+        Tab(
+            selected = selectedTab == TaskTab.ACTIVE,
+            onClick = { onTabSelected(TaskTab.ACTIVE) },
+            modifier = Modifier.semantics { contentDescription = activeDescription },
+            text = {
+                Text(
+                    text = stringResource(R.string.tab_active),
+                    style = MaterialTheme.typography.titleSmall,
+                )
+            },
+        )
+        Tab(
+            selected = selectedTab == TaskTab.COMPLETED,
+            onClick = { onTabSelected(TaskTab.COMPLETED) },
+            modifier = Modifier.semantics { contentDescription = completedDescription },
+            text = {
+                Text(
+                    text = stringResource(R.string.tab_completed),
+                    style = MaterialTheme.typography.titleSmall,
+                )
+            },
         )
     }
 }

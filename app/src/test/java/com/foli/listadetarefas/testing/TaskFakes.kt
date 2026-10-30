@@ -4,6 +4,9 @@ import com.foli.listadetarefas.core.result.AppFailure
 import com.foli.listadetarefas.core.result.AppResult
 import com.foli.listadetarefas.core.time.TimeProvider
 import com.foli.listadetarefas.domain.model.Task
+import com.foli.listadetarefas.domain.model.TaskTab
+import com.foli.listadetarefas.domain.model.UserPreferences
+import com.foli.listadetarefas.domain.repository.PreferencesRepository
 import com.foli.listadetarefas.domain.repository.TaskRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -26,8 +29,10 @@ class FakeTaskRepository : TaskRepository {
 
     var upsertCalls: Int = 0
     var deleteCalls: Int = 0
+    var setCompletedCalls: Int = 0
     var failUpsert: Boolean = false
     var failDelete: Boolean = false
+    var failSetCompleted: Boolean = false
     var failRead: Boolean = false
     var readDelayMillis: Long = 0L
 
@@ -68,9 +73,31 @@ class FakeTaskRepository : TaskRepository {
         tasks.update { list -> list.filterNot { it.id == id } }
         return AppResult.Success(Unit)
     }
+
+    override suspend fun setCompleted(id: String, completedAt: Long?): AppResult<Unit> {
+        setCompletedCalls++
+        if (failSetCompleted) return AppResult.Failure(AppFailure.StorageUnavailable)
+        tasks.update { list ->
+            list.map { task -> if (task.id == id) task.copy(completedAt = completedAt) else task }
+        }
+        return AppResult.Success(Unit)
+    }
 }
 
 /** Tempo determinístico: nenhum teste depende do relógio real. */
+class FakePreferencesRepository : PreferencesRepository {
+
+    val preferences = MutableStateFlow(UserPreferences())
+    var setSelectedTabCalls: Int = 0
+
+    override fun observePreferences(): Flow<UserPreferences> = preferences
+
+    override suspend fun setSelectedTab(tab: TaskTab) {
+        setSelectedTabCalls++
+        preferences.update { it.copy(selectedTab = tab) }
+    }
+}
+
 class FakeTimeProvider(
     var nowMillisValue: Long = 1_000L,
     var todayValue: LocalDate = LocalDate.of(2026, 1, 1),

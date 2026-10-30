@@ -48,6 +48,7 @@ class TaskRowSemanticsTest {
                     onClick = {},
                     onEdit = {},
                     onDelete = {},
+                    onToggle = {},
                 )
             }
         }
@@ -65,11 +66,43 @@ class TaskRowSemanticsTest {
                     onClick = {},
                     onEdit = {},
                     onDelete = {},
+                    onToggle = {},
                 )
             }
         }
 
         composeRule.onNodeWithContentDescription("Ligar para o dentista").assertIsDisplayed()
+    }
+
+    @Test
+    fun completedRow_announcesCompletionDateAndStrikethrough() {
+        composeRule.setContent {
+            ListaDeTarefasTheme {
+                TaskRow(
+                    task = TaskUiModel(
+                        id = "id-2",
+                        title = "Comprar leite",
+                        description = "No mercado",
+                        isCompleted = true,
+                        completedOnDate = "12/11/2026",
+                    ),
+                    onClick = {},
+                    onEdit = {},
+                    onDelete = {},
+                    onToggle = {},
+                )
+            }
+        }
+
+        val expected = context.getString(
+            R.string.a11y_task,
+            context.getString(R.string.a11y_task, "Comprar leite", "No mercado"),
+            context.getString(R.string.completed_on_a11y, "12/11/2026"),
+        )
+        composeRule.onNodeWithContentDescription(expected).assertIsDisplayed()
+        composeRule
+            .onNodeWithText(context.getString(R.string.completed_on, "12/11/2026"))
+            .assertIsDisplayed()
     }
 
     @Test
@@ -81,6 +114,7 @@ class TaskRowSemanticsTest {
                     onClick = {},
                     onEdit = {},
                     onDelete = {},
+                    onToggle = {},
                 )
             }
         }
