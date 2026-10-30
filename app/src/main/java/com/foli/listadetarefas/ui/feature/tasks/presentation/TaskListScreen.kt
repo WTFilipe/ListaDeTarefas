@@ -20,6 +20,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -51,6 +52,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 @Composable
 fun TaskListRoute(
     onNavigateToEditor: (String?) -> Unit,
+    onNavigateToLabels: () -> Unit,
     viewModel: TaskListViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -64,6 +66,7 @@ fun TaskListRoute(
         viewModel.effects.collect { effect ->
             when (effect) {
                 is TaskListEffect.NavigateToEditor -> onNavigateToEditor(effect.taskId)
+                TaskListEffect.NavigateToLabels -> onNavigateToLabels()
                 is TaskListEffect.ShowStorageError -> {
                     val result = snackbarHostState.showSnackbar(
                         message = effect.message.asString(resources),
@@ -85,6 +88,7 @@ fun TaskListRoute(
             viewModel.onAction(TaskListAction.CompletionToggled(taskId, isCompleted))
         },
         onNewTask = { viewModel.onAction(TaskListAction.NewTaskClicked) },
+        onLabelsClick = { viewModel.onAction(TaskListAction.LabelsClicked) },
         onTaskClick = { taskId -> viewModel.onAction(TaskListAction.TaskClicked(taskId)) },
         onEditTask = { taskId -> viewModel.onAction(TaskListAction.TaskClicked(taskId)) },
         onDeleteRequest = { taskId -> viewModel.onAction(TaskListAction.DeleteRequested(taskId)) },
@@ -101,6 +105,7 @@ private fun TaskListScreen(
     onTabSelected: (TaskTab) -> Unit,
     onCompletionToggled: (String, Boolean) -> Unit,
     onNewTask: () -> Unit,
+    onLabelsClick: () -> Unit,
     onTaskClick: (String) -> Unit,
     onEditTask: (String) -> Unit,
     onDeleteRequest: (String) -> Unit,
@@ -116,7 +121,14 @@ private fun TaskListScreen(
 
     Scaffold(
         topBar = {
-            ActionTopAppBar(title = stringResource(R.string.task_list_title))
+            ActionTopAppBar(
+                title = stringResource(R.string.task_list_title),
+                actions = {
+                    TextButton(onClick = onLabelsClick) {
+                        Text(text = stringResource(R.string.labels_title))
+                    }
+                },
+            )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {

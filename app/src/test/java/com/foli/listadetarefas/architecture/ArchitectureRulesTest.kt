@@ -342,8 +342,7 @@ class ArchitectureRulesTest {
 
         val laterStories = setOf(
             "search_placeholder", "sort_label",
-            "sort_sheet_title", "label_none", "labels_title",
-            "deadline_section",
+            "sort_sheet_title", "deadline_section",
         )
         val leaked = laterStories intersect declared
         assertTrue("Strings de histórias posteriores não pertencem à US-01: $leaked", leaked.isEmpty())
@@ -382,6 +381,31 @@ class ArchitectureRulesTest {
         )
         val missing = required - declared
         assertTrue("Strings da US-03 ausentes: $missing", missing.isEmpty())
+    }
+
+    @Test
+    fun strings_containUs04LabelKeys() {
+        val strings = moduleDir.resolve("src/main/res/values/strings.xml")
+        assertTrue("strings.xml ausente", strings.exists())
+        val declared = Regex("""<string\s+name="([^"]+)"""")
+            .findAll(strings.readText())
+            .map { it.groupValues[1] }
+            .toSet()
+
+        val required = setOf(
+            "labels_title", "label_new", "label_edit", "label_name_label",
+            "label_name_required", "label_name_duplicate", "label_color_section",
+            "label_delete_title", "label_delete_body", "empty_labels_title",
+            "empty_labels_body", "selector_empty_labels", "labels_load_error",
+            "a11y_loading_labels", "a11y_more_options_label", "a11y_label",
+            "a11y_label_color", "a11y_selected", "support_max_chars",
+            "label_section", "label_none", "label_create_shortcut",
+            "color_name_red", "color_name_orange", "color_name_mustard",
+            "color_name_green", "color_name_teal", "color_name_blue",
+            "color_name_purple", "color_name_pink",
+        )
+        val missing = required - declared
+        assertTrue("Strings da US-04 ausentes: $missing", missing.isEmpty())
     }
 
     // ------------------------------------------------------------------

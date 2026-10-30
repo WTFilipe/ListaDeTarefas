@@ -59,12 +59,18 @@ fun TaskRow(
     } else {
         stringResource(R.string.a11y_task, title, description)
     }
+    val labelText = task.label?.let {
+        stringResource(R.string.a11y_label, it.name)
+    }
+    val withLabelText = labelText?.let {
+        stringResource(R.string.a11y_task, baseSemanticsText, it)
+    } ?: baseSemanticsText
     val completedLabel = task.completedOnDate?.let {
         stringResource(R.string.completed_on_a11y, it)
     }
     val semanticsText = completedLabel?.let {
-        stringResource(R.string.a11y_task, baseSemanticsText, it)
-    } ?: baseSemanticsText
+        stringResource(R.string.a11y_task, withLabelText, it)
+    } ?: withLabelText
     val editLabel = stringResource(R.string.a11y_edit_task)
     val checkboxState = stringResource(
         if (task.isCompleted) R.string.a11y_checkbox_completed else R.string.a11y_checkbox_not_completed,
@@ -124,12 +130,24 @@ fun TaskRow(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            if (task.completedOnDate != null) {
-                Text(
-                    text = stringResource(R.string.completed_on, task.completedOnDate),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+            if (task.label != null || task.completedOnDate != null) {
+                Row(
+                    modifier = Modifier.padding(top = 4.dp),
+                ) {
+                    LabelChip(label = task.label)
+                    if (task.completedOnDate != null) {
+                        if (task.label != null) {
+                            androidx.compose.foundation.layout.Spacer(
+                                modifier = Modifier.size(4.dp),
+                            )
+                        }
+                        Text(
+                            text = stringResource(R.string.completed_on, task.completedOnDate),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
             }
         }
 

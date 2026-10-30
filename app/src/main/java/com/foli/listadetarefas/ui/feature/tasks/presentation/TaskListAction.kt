@@ -8,6 +8,7 @@ sealed interface TaskListAction {
     data class CompletionToggled(val taskId: String, val isCompleted: Boolean) : TaskListAction
     data class TaskClicked(val taskId: String) : TaskListAction
     data object NewTaskClicked : TaskListAction
+    data object LabelsClicked : TaskListAction
     data class DeleteRequested(val taskId: String) : TaskListAction
     data object DeleteConfirmed : TaskListAction
     data object DeleteDismissed : TaskListAction

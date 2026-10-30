@@ -8,13 +8,16 @@ import com.foli.listadetarefas.core.analytics.AnalyticsTracker
 import com.foli.listadetarefas.core.result.AppResult
 import com.foli.listadetarefas.domain.logic.TaskFilter
 import com.foli.listadetarefas.domain.model.Task
+import com.foli.listadetarefas.domain.model.TaskLabel
 import com.foli.listadetarefas.domain.model.TaskTab
+import com.foli.listadetarefas.domain.usecase.label.ObserveLabelsUseCase
 import com.foli.listadetarefas.domain.usecase.preferences.ObserveUserPreferencesUseCase
 import com.foli.listadetarefas.domain.usecase.preferences.SetSelectedTabUseCase
 import com.foli.listadetarefas.domain.usecase.task.DeleteTaskUseCase
 import com.foli.listadetarefas.domain.usecase.task.ObserveTasksUseCase
 import com.foli.listadetarefas.domain.usecase.task.SetTaskCompletedUseCase
 import com.foli.listadetarefas.ui.UiText
+import com.foli.listadetarefas.ui.model.TaskUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -46,6 +49,7 @@ import javax.inject.Inject
 @HiltViewModel
 class TaskListViewModel @Inject constructor(
     private val observeTasksUseCase: ObserveTasksUseCase,
+    private val observeLabelsUseCase: ObserveLabelsUseCase,
     private val deleteTaskUseCase: DeleteTaskUseCase,
     private val setTaskCompletedUseCase: SetTaskCompletedUseCase,
     private val observeUserPreferencesUseCase: ObserveUserPreferencesUseCase,
@@ -61,6 +65,7 @@ class TaskListViewModel @Inject constructor(
 
     private var observeJob: Job? = null
     private var latestTasks: List<Task> = emptyList()
+    private var latestLabels: List<TaskLabel> = emptyList()
 
     init {
         startObserving()
@@ -73,6 +78,7 @@ class TaskListViewModel @Inject constructor(
                 toggleCompletion(action.taskId, action.isCompleted)
             is TaskListAction.TaskClicked -> emitEffect(TaskListEffect.NavigateToEditor(action.taskId))
             TaskListAction.NewTaskClicked -> emitEffect(TaskListEffect.NavigateToEditor(null))
+            TaskListAction.LabelsClicked -> emitEffect(TaskListEffect.NavigateToLabels)
             is TaskListAction.DeleteRequested -> _state.update { it.copy(pendingDeleteId = action.taskId) }
             TaskListAction.DeleteDismissed -> _state.update { it.copy(pendingDeleteId = null) }
             TaskListAction.DeleteConfirmed -> confirmDelete()
@@ -94,20 +100,24 @@ class TaskListViewModel @Inject constructor(
             }
             combine(
                 observeTasksUseCase(),
+                observeLabelsUseCase(),
                 observeUserPreferencesUseCase(),
-            ) { tasks, preferences -> tasks to preferences.selectedTab }
+            ) { tasks, labels, preferences ->
+                Triple(tasks, labels, preferences.selectedTab)
+            }
                 .catch {
                     slowLoadingJob.cancel()
                     _state.update { current -> current.copy(isLoading = false, loadFailed = true) }
                 }
-                .collect { (tasks, tab) ->
+                .collect { (tasks, labels, tab) ->
                     firstEmissionReceived = true
                     slowLoadingJob.cancel()
                     latestTasks = tasks
+                    latestLabels = labels
                     _state.update { current ->
                         current.copy(
                             tab = tab,
-                            rows = project(tasks, tab),
+                            rows = project(tasks, labels, tab),
                             isLoading = false,
                             loadFailed = false,
                         )
@@ -116,13 +126,17 @@ class TaskListViewModel @Inject constructor(
         }
     }
 
-    private fun project(tasks: List<Task>, tab: TaskTab) =
-        TaskFilter.byTab(tasks, tab).map { task -> TaskUiMapper.toUiModel(task) }
+    private fun project(tasks: List<Task>, labels: List<TaskLabel>, tab: TaskTab): List<TaskUiModel> {
+        val labelById = labels.associateBy { it.id }
+        return TaskFilter.byTab(tasks, tab).map { task ->
+            TaskUiMapper.toUiModel(task, task.labelId?.let(labelById::get))
+        }
+    }
 
     private fun selectTab(tab: TaskTab) {
         if (_state.value.tab == tab) return
         _state.update { current ->
-            current.copy(tab = tab, rows = project(latestTasks, tab))
+            current.copy(tab = tab, rows = project(latestTasks, latestLabels, tab))
         }
         viewModelScope.launch { setSelectedTabUseCase(tab) }
     }

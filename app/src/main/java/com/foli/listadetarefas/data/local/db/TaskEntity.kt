@@ -2,6 +2,7 @@ package com.foli.listadetarefas.data.local.db
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
@@ -15,6 +16,14 @@ import androidx.room.PrimaryKey
  */
 @Entity(
     tableName = "task",
+    foreignKeys = [
+        ForeignKey(
+            entity = LabelEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["label_id"],
+            onDelete = ForeignKey.SET_NULL,
+        ),
+    ],
     indices = [
         Index(value = ["label_id"]),
         Index(value = ["created_at"]),

@@ -60,4 +60,40 @@
     <string name="a11y_reopen">Reabrir tarefa</string>
     <string name="a11y_switch_tab_active">Alternar para a aba Ativas</string>
     <string name="a11y_switch_tab_completed">Alternar para a aba Concluídas</string>
+
+    <!-- Etiquetas (US-04) -->
+    <string name="labels_title">Etiquetas</string>
+    <string name="label_new">Criar etiqueta</string>
+    <string name="label_edit">Editar etiqueta</string>
+    <string name="label_name_label">Nome</string>
+    <string name="label_name_required">Informe um nome</string>
+    <string name="label_name_duplicate">Já existe uma etiqueta com esse nome</string>
+    <string name="label_color_section">Cor</string>
+    <string name="label_delete_title">Excluir etiqueta?</string>
+    <string name="label_delete_body">As tarefas que usam esta etiqueta ficarão sem etiqueta.</string>
+    <string name="empty_labels_title">Nenhuma etiqueta</string>
+    <string name="empty_labels_body">Crie etiquetas para organizar suas tarefas por contexto.</string>
+    <string name="selector_empty_labels">Você ainda não tem etiquetas.</string>
+    <string name="labels_load_error">Não foi possível carregar as etiquetas.</string>
+    <string name="a11y_loading_labels">Carregando etiquetas</string>
+    <string name="a11y_more_options_label">Mais opções da etiqueta</string>
+    <string name="a11y_label">Etiqueta %1$s</string>
+    <string name="a11y_label_color">%1$s, cor da etiqueta</string>
+    <string name="a11y_selected">Selecionado</string>
+    <string name="support_max_chars">Máximo de %1$d caracteres</string>
+
+    <!-- Etiqueta no formulário (US-04) -->
+    <string name="label_section">Etiqueta</string>
+    <string name="label_none">Sem etiqueta</string>
+    <string name="label_create_shortcut">Criar etiqueta</string>
+
+    <!-- Nomes das cores da paleta fixa (US-04) -->
+    <string name="color_name_red">Vermelho</string>
+    <string name="color_name_orange">Laranja</string>
+    <string name="color_name_mustard">Mostarda</string>
+    <string name="color_name_green">Verde</string>
+    <string name="color_name_teal">Verde-água</string>
+    <string name="color_name_blue">Azul</string>
+    <string name="color_name_purple">Roxo</string>
+    <string name="color_name_pink">Rosa</string>
 </resources>

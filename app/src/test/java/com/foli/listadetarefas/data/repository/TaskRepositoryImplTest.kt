@@ -109,6 +109,23 @@ class TaskRepositoryImplTest {
     }
 
     @Test
+    fun setLabel_onlyChangesLabelAndKeepsOtherFields() = runTest {
+        val dao = FakeTaskDao()
+        val repository = repository(dao, StandardTestDispatcher(testScheduler))
+        repository.upsert(task("id-1", 100L, title = "Preservada"))
+
+        repository.setLabel("id-1", "label-1")
+
+        val stored = repository.observeTasks().first().single()
+        assertEquals("label-1", stored.labelId)
+        assertEquals("Preservada", stored.title)
+        assertEquals(100L, stored.createdAt)
+
+        repository.setLabel("id-1", null)
+        assertEquals(null, repository.observeTasks().first().single().labelId)
+    }
+
+    @Test
     fun storageFailure_isConvertedToStorageUnavailable() = runTest {
         val dao = FakeTaskDao().apply { failWrites = true }
         val repository = repository(dao, StandardTestDispatcher(testScheduler))
@@ -149,6 +166,24 @@ class TaskRepositoryImplTest {
             rows.update { list ->
                 list.map { entity ->
                     if (entity.id == id) entity.copy(completedAt = completedAt) else entity
+                }
+            }
+        }
+
+        override suspend fun setLabel(id: String, labelId: String?) {
+            if (failWrites) throw IllegalStateException("falha de etiqueta simulada")
+            rows.update { list ->
+                list.map { entity ->
+                    if (entity.id == id) entity.copy(labelId = labelId) else entity
+                }
+            }
+        }
+
+        override suspend fun clearLabel(labelId: String) {
+            if (failWrites) throw IllegalStateException("falha de limpeza simulada")
+            rows.update { list ->
+                list.map { entity ->
+                    if (entity.labelId == labelId) entity.copy(labelId = null) else entity
                 }
             }
         }

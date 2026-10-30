@@ -20,4 +20,10 @@ interface TaskRepository {
      * é idempotente e não toca em `createdAt` nem no conteúdo.
      */
     suspend fun setCompleted(id: String, completedAt: Long?): AppResult<Unit>
+
+    /**
+     * Associa a etiqueta (US-04). `null` remove a associação. Altera somente
+     * `labelId`, preservando todo o restante da tarefa.
+     */
+    suspend fun setLabel(id: String, labelId: String?): AppResult<Unit>
 }

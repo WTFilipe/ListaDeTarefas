@@ -24,12 +24,12 @@ class UpdateTaskUseCase @Inject constructor(
             is AppResult.Failure -> return result
             is AppResult.Success -> result.data
         }
-        // Preserva os campos que o formulário da US-01 não edita (etiqueta e
-        // prazo virão em US-04/US-05); regravá-los com o default nulo do draft
-        // apagaria vínculos existentes.
+        // A US-04 edita a etiqueta no formulário; o prazo (US-05) ainda não é
+        // editável e permanece o valor existente.
         val updated = existing.copy(
             title = normalized.title,
             description = normalized.description,
+            labelId = draft.labelId,
         )
         return when (val write = repository.upsert(updated)) {
             is AppResult.Failure -> write

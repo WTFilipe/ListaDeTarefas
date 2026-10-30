@@ -10,6 +10,7 @@ data class TaskUiModel(
     val id: String,
     val title: String,
     val description: String,
+    val label: LabelUiModel? = null,
     val isCompleted: Boolean = false,
     val completedOnDate: String? = null,
 )

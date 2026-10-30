@@ -11,6 +11,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -20,9 +22,13 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.foli.listadetarefas.R
+import com.foli.listadetarefas.core.palette.LabelColorKey
 import com.foli.listadetarefas.ui.UiText
 import com.foli.listadetarefas.ui.designsystem.components.ActionTopAppBar
 import com.foli.listadetarefas.ui.designsystem.components.ErrorBanner
+import com.foli.listadetarefas.ui.designsystem.components.LabelEditorSheet
+import com.foli.listadetarefas.ui.designsystem.components.LabelSelectorRow
+import com.foli.listadetarefas.ui.feature.editor.presentation.components.LabelSelectorSheet
 import com.foli.listadetarefas.ui.feature.editor.presentation.components.TaskFormFields
 
 /**
@@ -34,8 +40,19 @@ import com.foli.listadetarefas.ui.feature.editor.presentation.components.TaskFor
 fun TaskEditorScreen(
     state: TaskEditorState,
     titleFocusRequester: FocusRequester,
+    snackbarHostState: SnackbarHostState,
+    showLabelSelector: Boolean,
     onTitleChanged: (String) -> Unit,
     onDescriptionChanged: (String) -> Unit,
+    onLabelClick: () -> Unit,
+    onLabelSelectorDismiss: () -> Unit,
+    onLabelSelected: (String?) -> Unit,
+    onLabelCreateShortcut: () -> Unit,
+    onLabelEditorNameChange: (String) -> Unit,
+    onLabelEditorColorSelected: (LabelColorKey) -> Unit,
+    onLabelEditorSave: () -> Unit,
+    onLabelEditorCancel: () -> Unit,
+    onRetryLoadLabels: () -> Unit,
     onBack: () -> Unit,
     onSave: () -> Unit,
     onRetrySave: () -> Unit,
@@ -66,6 +83,7 @@ fun TaskEditorScreen(
                 },
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -104,6 +122,51 @@ fun TaskEditorScreen(
                 titleFocusRequester = titleFocusRequester,
                 enabled = formEnabled,
             )
+
+            if (state.labelsLoadFailed) {
+                ErrorBanner(
+                    message = UiText.Res(R.string.labels_load_error),
+                    onRetry = onRetryLoadLabels,
+                )
+            } else if (state.isLabelLoading) {
+                Text(
+                    text = stringResource(R.string.a11y_loading_labels),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            Text(
+                text = stringResource(R.string.label_section),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            LabelSelectorRow(
+                current = state.availableLabels.firstOrNull { it.id == state.selectedLabelId },
+                onClick = onLabelClick,
+            )
         }
+    }
+
+    state.labelEditor?.let { editor ->
+        LabelEditorSheet(
+            state = editor,
+            isSaving = false,
+            onNameChange = onLabelEditorNameChange,
+            onColorSelected = onLabelEditorColorSelected,
+            onSave = onLabelEditorSave,
+            onCancel = onLabelEditorCancel,
+            maxNameLength = com.foli.listadetarefas.domain.model.TaskLimits.LABEL_NAME_MAX,
+        )
+    }
+
+    if (showLabelSelector) {
+        LabelSelectorSheet(
+            labels = state.availableLabels,
+            selectedLabelId = state.selectedLabelId,
+            onSelect = onLabelSelected,
+            onCreateShortcut = onLabelCreateShortcut,
+            onDismiss = onLabelSelectorDismiss,
+        )
     }
 }

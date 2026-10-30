@@ -4,8 +4,10 @@ import com.foli.listadetarefas.core.result.AppFailure
 import com.foli.listadetarefas.core.result.AppResult
 import com.foli.listadetarefas.core.time.TimeProvider
 import com.foli.listadetarefas.domain.model.Task
+import com.foli.listadetarefas.domain.model.TaskLabel
 import com.foli.listadetarefas.domain.model.TaskTab
 import com.foli.listadetarefas.domain.model.UserPreferences
+import com.foli.listadetarefas.domain.repository.LabelRepository
 import com.foli.listadetarefas.domain.repository.PreferencesRepository
 import com.foli.listadetarefas.domain.repository.TaskRepository
 import kotlinx.coroutines.delay
@@ -33,6 +35,7 @@ class FakeTaskRepository : TaskRepository {
     var failUpsert: Boolean = false
     var failDelete: Boolean = false
     var failSetCompleted: Boolean = false
+    var failSetLabel: Boolean = false
     var failRead: Boolean = false
     var readDelayMillis: Long = 0L
 
@@ -80,6 +83,69 @@ class FakeTaskRepository : TaskRepository {
         tasks.update { list ->
             list.map { task -> if (task.id == id) task.copy(completedAt = completedAt) else task }
         }
+        return AppResult.Success(Unit)
+    }
+
+    override suspend fun setLabel(id: String, labelId: String?): AppResult<Unit> {
+        if (failSetLabel) return AppResult.Failure(AppFailure.StorageUnavailable)
+        tasks.update { list ->
+            list.map { task -> if (task.id == id) task.copy(labelId = labelId) else task }
+        }
+        return AppResult.Success(Unit)
+    }
+}
+
+/** Dublê em memória do contrato de etiquetas (US-04). */
+class FakeLabelRepository : LabelRepository {
+
+    val labels = MutableStateFlow<List<TaskLabel>>(emptyList())
+
+    var upsertCalls: Int = 0
+    var deleteCalls: Int = 0
+    var failUpsert: Boolean = false
+    var failDelete: Boolean = false
+    var failRead: Boolean = false
+    var readDelayMillis: Long = 0L
+
+    override fun observeLabels(): Flow<List<TaskLabel>> =
+        if (failRead) {
+            flow { throw IllegalStateException("falha de armazenamento simulada") }
+        } else {
+            flow {
+                if (readDelayMillis > 0L) delay(readDelayMillis)
+                emitAll(labels)
+            }
+        }
+
+    override suspend fun getLabelById(id: String): AppResult<TaskLabel?> =
+        if (failRead) {
+            AppResult.Failure(AppFailure.StorageUnavailable)
+        } else {
+            AppResult.Success(labels.value.firstOrNull { it.id == id })
+        }
+
+    override suspend fun getByNormalizedNameKey(nameKey: String): AppResult<TaskLabel?> =
+        if (failRead) {
+            AppResult.Failure(AppFailure.StorageUnavailable)
+        } else {
+            AppResult.Success(labels.value.firstOrNull { it.nameKey == nameKey })
+        }
+
+    override suspend fun upsert(label: TaskLabel): AppResult<Unit> {
+        upsertCalls++
+        if (failUpsert) return AppResult.Failure(AppFailure.StorageUnavailable)
+        val duplicate = labels.value.any {
+            it.nameKey == label.nameKey && it.id != label.id
+        }
+        if (duplicate) return AppResult.Failure(AppFailure.DuplicateLabelName)
+        labels.update { list -> list.filterNot { it.id == label.id } + label }
+        return AppResult.Success(Unit)
+    }
+
+    override suspend fun deleteById(id: String): AppResult<Unit> {
+        deleteCalls++
+        if (failDelete) return AppResult.Failure(AppFailure.StorageUnavailable)
+        labels.update { list -> list.filterNot { it.id == id } }
         return AppResult.Success(Unit)
     }
 }

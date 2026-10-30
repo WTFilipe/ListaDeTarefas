@@ -6,14 +6,22 @@ import androidx.lifecycle.viewModelScope
 import com.foli.listadetarefas.R
 import com.foli.listadetarefas.core.analytics.AnalyticsEvents
 import com.foli.listadetarefas.core.analytics.AnalyticsTracker
+import com.foli.listadetarefas.core.palette.LabelColorKey
 import com.foli.listadetarefas.core.result.AppFailure
 import com.foli.listadetarefas.core.result.AppResult
+import com.foli.listadetarefas.domain.logic.LabelValidator
 import com.foli.listadetarefas.domain.logic.TaskValidator
 import com.foli.listadetarefas.domain.model.TaskDraft
+import com.foli.listadetarefas.domain.model.TaskLabel
+import com.foli.listadetarefas.domain.model.TaskLimits
+import com.foli.listadetarefas.domain.usecase.label.CreateLabelUseCase
+import com.foli.listadetarefas.domain.usecase.label.ObserveLabelsUseCase
 import com.foli.listadetarefas.domain.usecase.task.CreateTaskUseCase
 import com.foli.listadetarefas.domain.usecase.task.ObserveTaskUseCase
 import com.foli.listadetarefas.domain.usecase.task.UpdateTaskUseCase
 import com.foli.listadetarefas.ui.UiText
+import com.foli.listadetarefas.ui.model.LabelEditorUiModel
+import com.foli.listadetarefas.ui.model.LabelUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -48,6 +56,8 @@ class TaskEditorViewModel @Inject constructor(
     private val createTaskUseCase: CreateTaskUseCase,
     private val updateTaskUseCase: UpdateTaskUseCase,
     private val observeTaskUseCase: ObserveTaskUseCase,
+    private val observeLabelsUseCase: ObserveLabelsUseCase,
+    private val createLabelUseCase: CreateLabelUseCase,
     private val analyticsTracker: AnalyticsTracker,
 ) : ViewModel() {
 
@@ -62,13 +72,16 @@ class TaskEditorViewModel @Inject constructor(
     val effects: Flow<TaskEditorEffect> = _effects.receiveAsFlow()
 
     private var loadJob: Job? = null
+    private var labelsJob: Job? = null
     private var taskLoaded: Boolean = false
+    private var newLabelId: String? = null
 
     /** `true` quando o usuário já alterou o formulário; impede que uma emissão
      *  tardia do carregamento sobrescreva o conteúdo digitado. */
     private var isDirty: Boolean = false
 
     init {
+        startObservingLabels()
         if (mode is EditorMode.Edit) {
             loadTask()
         }
@@ -91,8 +104,35 @@ class TaskEditorViewModel @Inject constructor(
                     it.copy(description = TaskValidator.limitDescription(action.value))
                 }
             }
+            is TaskEditorAction.LabelSelected -> {
+                isDirty = true
+                _state.update { it.copy(selectedLabelId = action.labelId) }
+            }
+            TaskEditorAction.LabelCreateShortcutClicked -> {
+                newLabelId = UUID.randomUUID().toString()
+                _state.update {
+                    it.copy(labelEditor = LabelEditorUiModel(colorKey = LabelColorKey.DEFAULT))
+                }
+            }
+            is TaskEditorAction.LabelEditorNameChanged -> _state.update { current ->
+                val editor = current.labelEditor ?: return@update current
+                current.copy(
+                    labelEditor = editor.copy(
+                        name = LabelValidator.limitName(action.value),
+                        nameError = null,
+                    ),
+                )
+            }
+            is TaskEditorAction.LabelEditorColorSelected -> _state.update { current ->
+                val editor = current.labelEditor ?: return@update current
+                current.copy(labelEditor = editor.copy(colorKey = action.colorKey))
+            }
+            TaskEditorAction.LabelEditorSaveClicked -> saveLabelFromShortcut()
+            TaskEditorAction.LabelEditorCancelClicked ->
+                _state.update { it.copy(labelEditor = null) }
             TaskEditorAction.SaveClicked -> save()
             TaskEditorAction.RetrySaveClicked -> save()
+            TaskEditorAction.RetryLoadLabelsClicked -> startObservingLabels()
             TaskEditorAction.RetryLoadTaskClicked -> loadTask()
         }
     }
@@ -117,6 +157,7 @@ class TaskEditorViewModel @Inject constructor(
                 id = current.mode.taskId,
                 title = current.title,
                 description = current.description,
+                labelId = current.selectedLabelId,
             )
             val result = when (current.mode) {
                 is EditorMode.Create -> createTaskUseCase(draft)
@@ -168,6 +209,7 @@ class TaskEditorViewModel @Inject constructor(
                                 current.copy(
                                     title = TaskValidator.limitTitle(task.title),
                                     description = TaskValidator.limitDescription(task.description),
+                                    selectedLabelId = task.labelId,
                                     isLoading = false,
                                     taskLoadFailed = false,
                                 )
@@ -178,11 +220,97 @@ class TaskEditorViewModel @Inject constructor(
         }
     }
 
+    private fun startObservingLabels() {
+        labelsJob?.cancel()
+        _state.update { it.copy(labelsLoadFailed = false, isLabelLoading = false) }
+        labelsJob = viewModelScope.launch {
+            var firstEmissionReceived = false
+            val slowLoadingJob = launch {
+                kotlinx.coroutines.delay(LABEL_LOADING_DELAY_MS)
+                if (!firstEmissionReceived) {
+                    _state.update { it.copy(isLabelLoading = true) }
+                }
+            }
+            observeLabelsUseCase()
+                .catch {
+                    slowLoadingJob.cancel()
+                    _state.update { current ->
+                        current.copy(isLabelLoading = false, labelsLoadFailed = true)
+                    }
+                }
+                .collect { labels ->
+                    firstEmissionReceived = true
+                    slowLoadingJob.cancel()
+                    _state.update { current ->
+                        current.copy(
+                            availableLabels = labels.map(::toLabelUiModel),
+                            isLabelLoading = false,
+                            labelsLoadFailed = false,
+                        )
+                    }
+                }
+        }
+    }
+
+    /**
+     * Cria a etiqueta pelo atalho do S7 (mesmo use case da S3). Em sucesso fecha
+     * o S4 e seleciona a etiqueta nova sem alterar título/descrição; duplicata
+     * mantém o sheet aberto com erro inline.
+     */
+    private fun saveLabelFromShortcut() {
+        val editor = _state.value.labelEditor ?: return
+        val labelId = newLabelId ?: return
+        viewModelScope.launch {
+            when (val result = createLabelUseCase(labelId, editor.name, editor.colorKey)) {
+                is AppResult.Success -> {
+                    analyticsTracker.track(
+                        AnalyticsEvents.LABEL_CREATED,
+                        mapOf("color" to result.data.colorKey.name),
+                    )
+                    newLabelId = null
+                    _state.update {
+                        it.copy(labelEditor = null, selectedLabelId = result.data.id)
+                    }
+                }
+                is AppResult.Failure -> handleLabelEditorFailure(result.failure)
+            }
+        }
+    }
+
+    private fun handleLabelEditorFailure(failure: AppFailure) {
+        val inlineError = when (failure) {
+            AppFailure.EmptyLabelName -> UiText.Res(R.string.label_name_required)
+            AppFailure.DuplicateLabelName -> UiText.Res(R.string.label_name_duplicate)
+            AppFailure.TextTooLong -> UiText.Res(
+                R.string.support_max_chars,
+                listOf(TaskLimits.LABEL_NAME_MAX),
+            )
+            else -> null
+        }
+        if (inlineError != null) {
+            _state.update { current ->
+                val editor = current.labelEditor ?: return@update current
+                current.copy(labelEditor = editor.copy(nameError = inlineError))
+            }
+        } else {
+            emitEffect(TaskEditorEffect.ShowStorageError(UiText.Res(R.string.storage_error_message)))
+        }
+    }
+
+    private fun toLabelUiModel(label: TaskLabel): LabelUiModel = LabelUiModel(
+        id = label.id,
+        name = label.name,
+        colorKey = label.colorKey,
+    )
+
     private fun trackSuccess(mode: EditorMode, draft: TaskDraft) {
         when (mode) {
             is EditorMode.Create -> analyticsTracker.track(
                 AnalyticsEvents.TASK_CREATED_SUCCESS,
-                mapOf("has_description" to draft.description.isNotBlank()),
+                mapOf(
+                    "has_description" to draft.description.isNotBlank(),
+                    "has_label" to (draft.labelId != null),
+                ),
             )
             is EditorMode.Edit -> analyticsTracker.track(
                 AnalyticsEvents.TASK_UPDATED,
@@ -196,5 +324,6 @@ class TaskEditorViewModel @Inject constructor(
 
     private companion object {
         const val NAV_ARG_TASK_ID = "taskId"
+        const val LABEL_LOADING_DELAY_MS = 200L
     }
 }

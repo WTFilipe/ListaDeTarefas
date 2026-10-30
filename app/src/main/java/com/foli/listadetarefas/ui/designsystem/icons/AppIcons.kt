@@ -43,6 +43,21 @@ object AppIcons {
         pathData = "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z",
     )
 
+    val Check: ImageVector = icon(
+        name = "Check",
+        pathData = "M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z",
+    )
+
+    val Tag: ImageVector = icon(
+        name = "Tag",
+        pathData = "M17.63 5.84C17.27 5.33 16.67 5 16 5H5c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h11c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z",
+    )
+
+    val ExpandMore: ImageVector = icon(
+        name = "ExpandMore",
+        pathData = "M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z",
+    )
+
     private fun icon(name: String, pathData: String): ImageVector {
         val nodes = PathParser().parsePathString(pathData).toNodes()
         return ImageVector.Builder(
