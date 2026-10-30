@@ -1,3 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">ListaDeTarefas</string>
+    <!-- App / lista (US-01) -->
+    <string name="app_name">Lista de tarefas</string>
+    <string name="task_list_title">Tarefas</string>
+    <string name="new_task">Nova tarefa</string>
+    <string name="edit_task">Editar tarefa</string>
+
+    <!-- Ações (US-01) -->
+    <string name="save">Salvar</string>
+    <string name="saving">Salvando…</string>
+    <string name="cancel">Cancelar</string>
+    <string name="delete">Excluir</string>
+    <string name="menu_edit">Editar</string>
+    <string name="retry">Tentar novamente</string>
+
+    <!-- Exclusão (S6, US-01) -->
+    <string name="delete_task_title">Excluir tarefa?</string>
+    <string name="delete_task_body">Esta ação não pode ser desfeita.</string>
+
+    <!-- Formulário (S2, US-01) -->
+    <string name="task_title_label">Título</string>
+    <string name="field_required">Obrigatório</string>
+    <string name="task_title_required">Informe um título</string>
+    <string name="task_description_label_optional">Descrição (opcional)</string>
+
+    <!-- Estado vazio (US-01) -->
+    <string name="empty_active_title">Nenhuma tarefa por aqui</string>
+    <string name="empty_active_body">Crie sua primeira tarefa para começar.</string>
+
+    <!-- Erros (US-01) -->
+    <string name="storage_error_message">Não foi possível salvar. Tente novamente.</string>
+    <string name="storage_error_inline">Não foi possível salvar. Seu texto foi mantido.</string>
+    <string name="storage_delete_error_message">Não foi possível excluir. Tente novamente.</string>
+    <string name="task_load_error">Não foi possível carregar a tarefa.</string>
+
+    <!-- Acessibilidade (US-01) -->
+    <string name="a11y_more_options">Mais opções da tarefa</string>
+    <string name="a11y_loading_tasks">Carregando tarefas</string>
+    <string name="a11y_edit_task">Editar tarefa</string>
+    <string name="a11y_task">%1$s. %2$s</string>
+    <string name="a11y_back">Voltar</string>
 </resources>

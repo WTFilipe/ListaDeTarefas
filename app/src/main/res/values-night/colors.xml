@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fundo da janela (fora do Compose), alinhado a `surface` do COLOR_SCHEME §5. -->
+    <color name="window_background">#111418</color>
+</resources>

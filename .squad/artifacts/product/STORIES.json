@@ -21,8 +21,251 @@
         "No primeiro uso com lista ativa vazia, exibe estado vazio com texto explicativo e ação 'Nova tarefa'",
         "Em falha de armazenamento, exibe mensagem não técnica com ação 'Tentar novamente' e preserva o conteúdo digitado no formulário"
       ],
-      "status": "pending",
-      "tasks": []
+      "status": "plan_review",
+      "tasks": [
+        {
+          "id": "T01",
+          "title": "Fundação técnica, tema MD3 e regras de arquitetura",
+          "description": "Preparar o build (catálogo com Hilt/KSP, Room/KSP, DataStore, Navigation type-safe, coroutines, Turbine e serialization), Application/MainActivity com Hilt, manifest sem permissões e allowBackup=false, contratos transversais (UiText, AppResult/AppFailure, TimeProvider, AppLogger, Analytics no-op) e o tema Material 3 completo (dynamicColor=false, AppShapes.none/full). Criar o ArchitectureRulesTest como gate obrigatório por tarefa.",
+          "files": [
+            "gradle/libs.versions.toml",
+            "build.gradle.kts",
+            "app/build.gradle.kts",
+            "app/src/main/AndroidManifest.xml",
+            "app/src/main/res/xml/backup_rules.xml",
+            "app/src/main/res/xml/data_extraction_rules.xml",
+            "app/src/main/java/com/foli/listadetarefas/ListaDeTarefasApplication.kt",
+            "app/src/main/java/com/foli/listadetarefas/MainActivity.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/UiText.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/theme/Color.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/theme/Theme.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/theme/Type.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/theme/Shape.kt",
+            "app/src/main/java/com/foli/listadetarefas/core/result/AppResult.kt",
+            "app/src/main/java/com/foli/listadetarefas/core/result/AppFailure.kt",
+            "app/src/main/java/com/foli/listadetarefas/core/di/DispatcherQualifiers.kt",
+            "app/src/main/java/com/foli/listadetarefas/core/time/TimeProvider.kt",
+            "app/src/main/java/com/foli/listadetarefas/core/time/SystemTimeProvider.kt",
+            "app/src/main/java/com/foli/listadetarefas/core/logging/AppLogger.kt",
+            "app/src/main/java/com/foli/listadetarefas/core/analytics/AnalyticsEvents.kt",
+            "app/src/main/java/com/foli/listadetarefas/core/analytics/AnalyticsTracker.kt",
+            "app/src/main/java/com/foli/listadetarefas/core/analytics/NoOpAnalyticsTracker.kt",
+            "app/src/main/java/com/foli/listadetarefas/di/DispatcherModule.kt",
+            "app/src/main/java/com/foli/listadetarefas/di/TimeModule.kt",
+            "app/src/main/java/com/foli/listadetarefas/di/AnalyticsModule.kt",
+            "app/src/test/java/com/foli/listadetarefas/architecture/ArchitectureRulesTest.kt"
+          ],
+          "acceptance_criteria": [
+            "assembleDebug e testDebugUnitTest verdes com Hilt, Room, DataStore, Navigation Compose type-safe, coroutines, Turbine e kotlinx-serialization resolvidos pelo gradle/libs.versions.toml, sem build-logic",
+            "Tema Material 3 completo em claro/escuro seguindo isSystemInDarkTheme(), com dynamicColor = false e cores nomeadas por papel (nunca por matiz); AppShapes.none/full definidos em um único ponto",
+            "ArchitectureRulesTest roda no testDebugUnitTest e cobre as regras de fronteira do ARCHITECTURE.md §2 (feature/data/ui/domain/core), falhando o build em violação",
+            "AndroidManifest sem <uses-permission>, allowBackup=false, sem dataExtractionRules/fullBackupContent e apenas MainActivity com exported=true e launcher intent",
+            "UiText (Res/Plain), AppResult/AppFailure, TimeProvider injetável (nenhum LocalDate.now()/System.currentTimeMillis() em código de produção), AppLogger no-op fora de debug e AnalyticsTracker no-op ligado por Hilt",
+            "Strings base do app em res/values/strings.xml (nenhuma string visível hardcoded em composables)"
+          ],
+          "depends_on": [],
+          "status": "pending",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-01/tasks/T01/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-01/tasks/T01/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-01/tasks/T01/MR.md"
+        },
+        {
+          "id": "T02",
+          "title": "Domínio de tarefas: modelos, regras puras e contratos",
+          "description": "Criar os modelos de domínio de tarefa (Task, TaskDraft, TaskLimits), as regras puras de validação/normalização (trim de título e descrição, descrição só com espaços vira vazia, títulos iguais permitidos), a ordenação vigente por criação mais recente, o filtro da lista ativa e os contratos de repositório e use cases de criação, edição, exclusão e observação, todos retornando AppResult e sem dependência de Android.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/domain/model/Task.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/model/TaskDraft.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/model/TaskLimits.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/logic/TaskValidator.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/logic/TaskSorter.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/logic/TaskFilter.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/repository/TaskRepository.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/usecase/task/ObserveTasksUseCase.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/usecase/task/ObserveTaskUseCase.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/usecase/task/CreateTaskUseCase.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/usecase/task/UpdateTaskUseCase.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/usecase/task/DeleteTaskUseCase.kt",
+            "app/src/test/java/com/foli/listadetarefas/domain/logic/TaskValidatorTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/domain/logic/TaskSorterTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/domain/logic/TaskFilterTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/domain/usecase/task/CreateTaskUseCaseTest.kt"
+          ],
+          "acceptance_criteria": [
+            "TaskValidator remove espaços das extremidades de título e descrição e grava descrição composta apenas por espaços como vazia (AC 4)",
+            "Título vazio, apenas espaços ou apenas quebras de linha é rejeitado com AppFailure.EmptyTitle, sem criar tarefa (AC 3, lado domínio)",
+            "Duas tarefas distintas com o mesmo título válido são aceitas (AC 11)",
+            "TaskSorter aplica a ordenação vigente da US-01 (criação mais recente primeiro) com desempate determinístico; nenhum seletor ou enum de 6 opções é antecipado (AC 5)",
+            "TaskFilter devolve apenas tarefas não concluídas (lista ativa), preparado para a aba da US-03 sem criar a UI dela",
+            "TaskRepository e os use cases expõem observação por Flow e operações de criar/atualizar/excluir retornando AppResult, sem Android, R.string ou Compose no pacote domain (verificado pelo ArchitectureRulesTest)",
+            "Atualização por id preserva created_at no contrato do use case e a exclusão é por id (AC 6 e AC 8, lado domínio)",
+            "Testes JUnit cobrem trim, título só espaços, títulos iguais, ordenação e filtro sem depender de relógio real"
+          ],
+          "depends_on": [
+            "T01"
+          ],
+          "status": "pending",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-01/tasks/T02/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-01/tasks/T02/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-01/tasks/T02/MR.md"
+        },
+        {
+          "id": "T03",
+          "title": "Persistência Room, mapeamento e repositório",
+          "description": "Implementar a tabela task em Room (schema v1 exportado), DAO reativo, mapper domínio<->entidade, TaskRepositoryImpl com escritas idempotentes, módulos Hilt de banco e repositório, e mapeamento de falhas de infraestrutura para StorageUnavailable sem vazar exceções para a UI.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/data/local/db/AppDatabase.kt",
+            "app/src/main/java/com/foli/listadetarefas/data/local/db/TaskEntity.kt",
+            "app/src/main/java/com/foli/listadetarefas/data/local/db/TaskDao.kt",
+            "app/src/main/java/com/foli/listadetarefas/data/mapper/TaskMapper.kt",
+            "app/src/main/java/com/foli/listadetarefas/data/repository/TaskRepositoryImpl.kt",
+            "app/src/main/java/com/foli/listadetarefas/di/DatabaseModule.kt",
+            "app/src/main/java/com/foli/listadetarefas/di/RepositoryModule.kt",
+            "app/schemas/",
+            "app/src/test/java/com/foli/listadetarefas/data/mapper/TaskMapperTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/data/repository/TaskRepositoryImplTest.kt"
+          ],
+          "acceptance_criteria": [
+            "Banco Room v1 com tabela task (id TEXT PK, title, description, label_id nulo, due_date nulo, created_at, completed_at nulo) e exportSchema em app/schemas/, com consultas expostas como Flow e escritas em Dispatchers.IO",
+            "Criação usa o id (UUID) recebido no TaskDraft e upsert por PK, de modo que repetir a operação (\"Tentar novamente\") não duplica a tarefa (AC 13, caso de borda)",
+            "Atualização por id reescreve título/descrição sem alterar created_at (AC 6) e exclusão por id remove o registro do armazenamento (AC 8)",
+            "Leitura reativa mantém as tarefas disponíveis após reabertura do app/processo, sem rede (AC 9), comprovada por teste de repositório com banco em memória ou, se o ambiente não permitir Robolectric, por teste de DAO documentado + limitação registrada",
+            "Falhas de armazenamento são convertidas em AppFailure.StorageUnavailable no repositório; nenhuma exceção de SQLite chega ao domínio/UI",
+            "Módulos Hilt DatabaseModule/RepositoryModule fornecem AppDatabase, TaskDao e TaskRepositoryImpl via @Binds, com @IoDispatcher no builder"
+          ],
+          "depends_on": [
+            "T02"
+          ],
+          "status": "pending",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-01/tasks/T03/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-01/tasks/T03/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-01/tasks/T03/MR.md"
+        },
+        {
+          "id": "T04",
+          "title": "S1 — lista ativa, linha acessível e navegação",
+          "description": "Entregar a tela principal da US-01: navegação type-safe (TaskList/TaskEditor), TaskListViewModel em MVI com estado vindo do Room, linha de tarefa com título e descrição em até 2 linhas e semântica com texto integral, estado vazio com ação 'Nova tarefa', loading acima de 200 ms, erro de leitura com 'Tentar novamente' e FAB que abre o formulário. Sem busca, abas, ordenação selecionável, etiqueta, prazo ou checkbox (histórias posteriores).",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/ui/model/TaskUiModel.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/designsystem/icons/AppIcons.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/designsystem/components/TaskRow.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/designsystem/components/EmptyState.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/designsystem/components/ErrorBanner.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/designsystem/components/ActionTopAppBar.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/navigation/AppDestination.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/navigation/AppNavHost.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListRoute.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListScreen.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListViewModel.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListState.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListAction.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListEffect.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskUiMapper.kt",
+            "app/src/main/res/values/strings.xml",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListViewModelTest.kt",
+            "app/src/androidTest/java/com/foli/listadetarefas/accessibility/TaskRowSemanticsTest.kt"
+          ],
+          "acceptance_criteria": [
+            "A tela principal exibe a lista ativa e um Extended FAB 'Nova tarefa' que emite NavigateToEditor(null) (AC 1)",
+            "Com a lista ativa vazia, aparece o estado vazio com texto explicativo e ação 'Nova tarefa', sem FAB duplicado e sem elementos quebrados (AC 12)",
+            "Cada linha mostra título (titleMedium) e descrição (bodyMedium) com maxLines = 2 e TextOverflow.Ellipsis; tarefa sem descrição não compõe o segundo texto (AC 10)",
+            "A semântica da linha expõe title + description completos em contentDescription (mergeDescendants) com onClickLabel 'Editar tarefa', e o teste instrumentado de semântica cobre texto truncado visualmente mantendo o texto integral (AC 10; se não houver emulador, checklist manual registrado no IMPLEMENTATION.md)",
+            "Tocar na linha emite NavigateToEditor(taskId) e o botão voltar do formulário retorna à lista (AC 6, navegação)",
+            "A lista reflete o resultado da observação do Room na ordenação vigente (criação mais recente primeiro) e novos itens aparecem no topo (AC 5, AC 9)",
+            "Falha ao ler o banco exibe banner não técnico com 'Tentar novamente' (RetryLoadClicked) sem travar a tela (AC 13, leitura)",
+            "UiModel usa apenas primitivos/UiText de ui/model; feature não importa data/di nem outra feature (ArchitectureRulesTest verde)",
+            "Testes de ViewModel com Turbine cobrem carregamento, lista, estado vazio, falha de leitura + retry, clique na linha e nova tarefa"
+          ],
+          "depends_on": [
+            "T03"
+          ],
+          "status": "pending",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-01/tasks/T04/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-01/tasks/T04/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-01/tasks/T04/MR.md"
+        },
+        {
+          "id": "T05",
+          "title": "S2 — formulário de criação e edição com validação e preservação",
+          "description": "Entregar o formulário de tarefa em MVI: título obrigatório e descrição opcional (sem contadores, que são da US-02), validação inline de título vazio/só espaços com foco no campo e formulário aberto, salvamento com trim e id gerado uma única vez na criação, carregamento de edição sem alterar created_at, cancelar/voltar descartando mudanças e erro de armazenamento em banner inline com 'Tentar novamente' preservando o conteúdo.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/editor/presentation/TaskEditorRoute.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/editor/presentation/TaskEditorScreen.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/editor/presentation/TaskEditorViewModel.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/editor/presentation/TaskEditorState.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/editor/presentation/TaskEditorAction.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/editor/presentation/TaskEditorEffect.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/editor/presentation/components/TaskFormFields.kt",
+            "app/src/main/res/values/strings.xml",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/editor/presentation/TaskEditorViewModelTest.kt"
+          ],
+          "acceptance_criteria": [
+            "O formulário tem campo título (obrigatório, singleLine) e descrição (opcional, minLines = 4), com textos 'Título', 'Obrigatório' e 'Descrição (opcional)' vindos de strings (AC 2)",
+            "Salvar com título vazio ou apenas espaços não cria tarefa, define titleError = task_title_required, emite RequestFieldFocus(TITLE), mantém o formulário aberto e o conteúdo digitado (AC 3)",
+            "Salvar válido envia título e descrição com trim; descrição só com espaços vira vazia (AC 4)",
+            "Criação usa o UUID gerado uma única vez ao abrir o formulário (EditorMode.Create.taskId), então 'Tentar novamente' não duplica a tarefa (AC 13, caso de borda)",
+            "Edição carrega os dados atuais da tarefa, salva por id sem alterar created_at e, se a tarefa não existir mais, emite NavigateBack (AC 6)",
+            "←/voltar descarta as mudanças e retorna à lista sem alterações, sem diálogo de confirmação e sem ação de exclusão no formulário (AC 7; DESIGN_SPEC §2.3)",
+            "Falha de armazenamento ao salvar exibe banner inline (storage_error_inline) com 'Tentar novamente' (RetrySaveClicked), preservando o conteúdo digitado e sem perder o modo de edição (AC 13)",
+            "Ao salvar com sucesso emite NavigateBack; a lista reflete a tarefa na ordenação vigente",
+            "Testes de ViewModel com Turbine cobrem validação, trim, criação idempotente, edição, cancelamento e erro + retry preservando conteúdo"
+          ],
+          "depends_on": [
+            "T04"
+          ],
+          "status": "pending",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-01/tasks/T05/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-01/tasks/T05/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-01/tasks/T05/MR.md"
+        },
+        {
+          "id": "T06",
+          "title": "Exclusão com confirmação e retry de armazenamento na lista",
+          "description": "Adicionar à S1 o menu da linha (Editar/Excluir), o dialog de confirmação de exclusão, o estado de exclusão pendente no TaskListViewModel e o snackbar de falha de armazenamento com 'Tentar novamente' que repete exatamente a mesma exclusão. Fechar a história com o checklist de acessibilidade e a verificação de persistência após reabrir o app.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/components/DeleteTaskDialog.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskRetryOperation.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListState.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListAction.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListEffect.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListViewModel.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListScreen.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/designsystem/components/TaskRow.kt",
+            "app/src/main/res/values/strings.xml",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListDeleteTest.kt",
+            "app/src/androidTest/java/com/foli/listadetarefas/accessibility/TaskRowSemanticsTest.kt"
+          ],
+          "acceptance_criteria": [
+            "O menu ⋮ de cada linha (contentDescription 'Mais opções da tarefa', alvo ≥ 48dp) oferece 'Editar' e 'Excluir', com 'Excluir' em cor de erro e Editar abrindo o formulário em modo edição (AC 6)",
+            "Excluir abre o dialog S6 com título 'Excluir tarefa?', corpo 'Esta ação não pode ser desfeita.' e ações 'Cancelar'/'Excluir'; cancelar mantém a tarefa intacta e tocar fora/voltar não confirma (AC 8)",
+            "Confirmar remove a tarefa da lista e do armazenamento (DeleteConfirmed → DeleteTaskUseCase), sem apagar outros registros (AC 8)",
+            "Falha ao excluir mostra snackbar não técnico (storage_delete_error_message) com ação 'Tentar novamente'; o retry usa TaskRetryOperation.DeleteTask(id) e repete a mesma exclusão (AC 13)",
+            "pendingDeleteId vive no TaskListState e DeleteRequested/DeleteDismissed/DeleteConfirmed são cobertos por testes de ViewModel com Turbine",
+            "A semântica do dialog e do menu é verificada (instrumentado quando houver emulador) e o checklist manual de acessibilidade da história (TalkBack com texto integral, fonte 200%, alvos ≥ 48dp) é registrado no IMPLEMENTATION.md",
+            "Verificação manual de persistência: criar, editar e excluir, fechar e reabrir o app sem rede, confirmando o estado esperado da lista (AC 9)"
+          ],
+          "depends_on": [
+            "T04",
+            "T05"
+          ],
+          "status": "pending",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-01/tasks/T06/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-01/tasks/T06/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-01/tasks/T06/MR.md"
+        }
+      ],
+      "plan_iterations": 0,
+      "plan_path": ".squad/stories/US-01/TASK_PLAN.md",
+      "plan_json": ".squad/stories/US-01/TASK_PLAN.json",
+      "review_path": ".squad/stories/US-01/PLAN_REVIEW.md",
+      "story_mr": ".squad/stories/US-01/MR.md",
+      "current_task": "T01"
     },
     {
       "id": "US-02",
@@ -38,7 +281,13 @@
         "Textos no limite continuam legíveis sem alterar a altura da linha: título e descrição com até 2 linhas cada e reticências, com texto completo no formulário e no TalkBack"
       ],
       "status": "pending",
-      "tasks": []
+      "tasks": [],
+      "plan_iterations": 0,
+      "plan_path": ".squad/stories/US-02/TASK_PLAN.md",
+      "plan_json": ".squad/stories/US-02/TASK_PLAN.json",
+      "review_path": ".squad/stories/US-02/PLAN_REVIEW.md",
+      "story_mr": ".squad/stories/US-02/MR.md",
+      "current_task": null
     },
     {
       "id": "US-03",
@@ -56,7 +305,13 @@
         "Excluir tarefa concluída segue o mesmo fluxo de confirmação e de falha de armazenamento da US-01"
       ],
       "status": "pending",
-      "tasks": []
+      "tasks": [],
+      "plan_iterations": 0,
+      "plan_path": ".squad/stories/US-03/TASK_PLAN.md",
+      "plan_json": ".squad/stories/US-03/TASK_PLAN.json",
+      "review_path": ".squad/stories/US-03/PLAN_REVIEW.md",
+      "story_mr": ".squad/stories/US-03/MR.md",
+      "current_task": null
     },
     {
       "id": "US-04",
@@ -79,7 +334,13 @@
         "Criação, edição e exclusão de etiquetas refletem imediatamente e persistem após reabrir"
       ],
       "status": "pending",
-      "tasks": []
+      "tasks": [],
+      "plan_iterations": 0,
+      "plan_path": ".squad/stories/US-04/TASK_PLAN.md",
+      "plan_json": ".squad/stories/US-04/TASK_PLAN.json",
+      "review_path": ".squad/stories/US-04/PLAN_REVIEW.md",
+      "story_mr": ".squad/stories/US-04/MR.md",
+      "current_task": null
     },
     {
       "id": "US-05",
@@ -97,7 +358,13 @@
         "A data limite persiste após reabrir o app"
       ],
       "status": "pending",
-      "tasks": []
+      "tasks": [],
+      "plan_iterations": 0,
+      "plan_path": ".squad/stories/US-05/TASK_PLAN.md",
+      "plan_json": ".squad/stories/US-05/TASK_PLAN.json",
+      "review_path": ".squad/stories/US-05/PLAN_REVIEW.md",
+      "story_mr": ".squad/stories/US-05/MR.md",
+      "current_task": null
     },
     {
       "id": "US-06",
@@ -116,7 +383,13 @@
         "O filtro permanece ativo ao abrir e fechar o formulário de criação/edição a partir da lista, e ao retornar o resultado já reflete a criação, edição, conclusão ou reabertura"
       ],
       "status": "pending",
-      "tasks": []
+      "tasks": [],
+      "plan_iterations": 0,
+      "plan_path": ".squad/stories/US-06/TASK_PLAN.md",
+      "plan_json": ".squad/stories/US-06/TASK_PLAN.json",
+      "review_path": ".squad/stories/US-06/PLAN_REVIEW.md",
+      "story_mr": ".squad/stories/US-06/MR.md",
+      "current_task": null
     },
     {
       "id": "US-07",
@@ -135,7 +408,14 @@
         "A opção selecionada fica visível (nome da ordenação atual) enquanto a lista é exibida"
       ],
       "status": "pending",
-      "tasks": []
+      "tasks": [],
+      "plan_iterations": 0,
+      "plan_path": ".squad/stories/US-07/TASK_PLAN.md",
+      "plan_json": ".squad/stories/US-07/TASK_PLAN.json",
+      "review_path": ".squad/stories/US-07/PLAN_REVIEW.md",
+      "story_mr": ".squad/stories/US-07/MR.md",
+      "current_task": null
     }
-  ]
+  ],
+  "current_story": "US-01"
 }
