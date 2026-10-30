@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import com.foli.listadetarefas.R
 import com.foli.listadetarefas.core.analytics.NoOpAnalyticsTracker
 import com.foli.listadetarefas.domain.model.Task
+import com.foli.listadetarefas.domain.model.TaskLimits
 import com.foli.listadetarefas.domain.usecase.task.CreateTaskUseCase
 import com.foli.listadetarefas.domain.usecase.task.ObserveTaskUseCase
 import com.foli.listadetarefas.domain.usecase.task.UpdateTaskUseCase
@@ -237,5 +238,68 @@ class TaskEditorViewModelTest {
         assertEquals(0, repository.upsertCalls)
         assertNull(viewModel.state.value.bannerError)
         assertNull(viewModel.state.value.titleError)
+    }
+
+    @Test
+    fun typingAboveTitleLimit_isBlockedAndCounterValueStaysAtMax() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        val viewModel = createViewModel(FakeTaskRepository())
+        val tooLong = "a".repeat(TaskLimits.TITLE_MAX + 10)
+
+        viewModel.onAction(TaskEditorAction.TitleChanged(tooLong))
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(TaskLimits.TITLE_MAX, viewModel.state.value.title.length)
+        assertEquals(tooLong.take(TaskLimits.TITLE_MAX), viewModel.state.value.title)
+        assertNull(viewModel.state.value.titleError)
+    }
+
+    @Test
+    fun typingAboveDescriptionLimit_isBlockedAndCounterValueStaysAtMax() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        val viewModel = createViewModel(FakeTaskRepository())
+        val tooLong = "b".repeat(TaskLimits.DESCRIPTION_MAX + 10)
+
+        viewModel.onAction(TaskEditorAction.DescriptionChanged(tooLong))
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(TaskLimits.DESCRIPTION_MAX, viewModel.state.value.description.length)
+        assertEquals(tooLong.take(TaskLimits.DESCRIPTION_MAX), viewModel.state.value.description)
+    }
+
+    @Test
+    fun pastingTextAboveLimit_keepsOnlyAcceptedPrefix() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        val viewModel = createViewModel(FakeTaskRepository())
+        val pastedTitle = "Título ".repeat(30)
+        val pastedDescription = "Descrição ".repeat(300)
+
+        viewModel.onAction(TaskEditorAction.TitleChanged(pastedTitle))
+        viewModel.onAction(TaskEditorAction.DescriptionChanged(pastedDescription))
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(pastedTitle.take(TaskLimits.TITLE_MAX), viewModel.state.value.title)
+        assertEquals(
+            pastedDescription.take(TaskLimits.DESCRIPTION_MAX),
+            viewModel.state.value.description,
+        )
+    }
+
+    @Test
+    fun editingTaskAboveLimit_normalizesLoadedContent() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        val oversized = Task(
+            id = "id-1",
+            title = "t".repeat(TaskLimits.TITLE_MAX + 5),
+            description = "d".repeat(TaskLimits.DESCRIPTION_MAX + 5),
+            createdAt = 100L,
+        )
+        val repository = FakeTaskRepository().apply { tasks.value = listOf(oversized) }
+
+        val viewModel = createViewModel(repository, taskId = "id-1")
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(TaskLimits.TITLE_MAX, viewModel.state.value.title.length)
+        assertEquals(TaskLimits.DESCRIPTION_MAX, viewModel.state.value.description.length)
     }
 }

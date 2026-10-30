@@ -36,8 +36,11 @@ import javax.inject.Inject
  * - Escrita só acontece em `SaveClicked`/`RetrySaveClicked`; digitar não grava.
  * - Edição: carrega a tarefa, salva por id sem alterar `createdAt`; se ela não
  *   existir mais, volta para a lista. Falha de leitura vira `taskLoadFailed`.
+ * - Limites: `TitleChanged`/`DescriptionChanged` truncam a entrada em 120/2000
+ *   (digitação e colagem) e o conteúdo carregado na edição também é normalizado,
+ *   de modo que o contador nunca reflete um valor acima do máximo.
  * - Trim/normalização ficam no domínio (`TaskValidator`/use cases), que também
- *   rejeita título vazio.
+ *   rejeita título vazio e revalida os limites.
  */
 @HiltViewModel
 class TaskEditorViewModel @Inject constructor(
@@ -75,11 +78,18 @@ class TaskEditorViewModel @Inject constructor(
         when (action) {
             is TaskEditorAction.TitleChanged -> {
                 isDirty = true
-                _state.update { it.copy(title = action.value, titleError = null) }
+                _state.update {
+                    it.copy(
+                        title = TaskValidator.limitTitle(action.value),
+                        titleError = null,
+                    )
+                }
             }
             is TaskEditorAction.DescriptionChanged -> {
                 isDirty = true
-                _state.update { it.copy(description = action.value) }
+                _state.update {
+                    it.copy(description = TaskValidator.limitDescription(action.value))
+                }
             }
             TaskEditorAction.SaveClicked -> save()
             TaskEditorAction.RetrySaveClicked -> save()
@@ -156,8 +166,8 @@ class TaskEditorViewModel @Inject constructor(
                                 current.copy(isLoading = false, taskLoadFailed = false)
                             } else {
                                 current.copy(
-                                    title = task.title,
-                                    description = task.description,
+                                    title = TaskValidator.limitTitle(task.title),
+                                    description = TaskValidator.limitDescription(task.description),
                                     isLoading = false,
                                     taskLoadFailed = false,
                                 )

@@ -3,8 +3,9 @@ package com.foli.listadetarefas.domain.model
 /**
  * Limites de texto do produto (ARCHITECTURE.md §3).
  *
- * Nesta história o modelo é **inerte**: não há contadores, bloqueio de digitação
- * nem validação de limite (isso pertence à US-02/US-04).
+ * O título é limitado a [TITLE_MAX] e a descrição a [DESCRIPTION_MAX]; a UI
+ * bloqueia o excedente e o domínio revalida ([com.foli.listadetarefas.domain.logic.TaskValidator]).
+ * O limite de 2 linhas ([LINE_MAX]) é visual, aplicado na linha da lista.
  */
 object TaskLimits {
     const val TITLE_MAX = 120

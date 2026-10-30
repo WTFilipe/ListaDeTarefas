@@ -24,6 +24,10 @@
     <string name="task_title_required">Informe um título</string>
     <string name="task_description_label_optional">Descrição (opcional)</string>
 
+    <!-- Contadores e limites (S2, US-02) -->
+    <string name="counter_format">%1$d/%2$d</string>
+    <string name="support_limit_reached">Limite atingido</string>
+
     <!-- Estado vazio (US-01) -->
     <string name="empty_active_title">Nenhuma tarefa por aqui</string>
     <string name="empty_active_body">Crie sua primeira tarefa para começar.</string>
