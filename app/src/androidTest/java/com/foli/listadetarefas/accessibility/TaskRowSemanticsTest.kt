@@ -1,0 +1,120 @@
+package com.foli.listadetarefas.accessibility
+
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import com.foli.listadetarefas.R
+import com.foli.listadetarefas.ui.designsystem.components.TaskRow
+import com.foli.listadetarefas.ui.feature.tasks.presentation.components.DeleteTaskDialog
+import com.foli.listadetarefas.ui.model.TaskUiModel
+import com.foli.listadetarefas.ui.theme.ListaDeTarefasTheme
+import org.junit.Assert.assertTrue
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+
+/**
+ * Semântica da linha da tarefa (US-01 AC 10): o truncamento visual (2 linhas) não
+ * pode perder informação no TalkBack — o `contentDescription` carrega o texto
+ * integral. Também cobre o menu ⋮ e o dialog S6 (T06).
+ */
+@RunWith(AndroidJUnit4::class)
+class TaskRowSemanticsTest {
+
+    @get:Rule
+    val composeRule = createComposeRule()
+
+    private val context = InstrumentationRegistry.getInstrumentation().targetContext
+
+    private fun task(title: String, description: String) = TaskUiModel(
+        id = "id-1",
+        title = title,
+        description = description,
+    )
+
+    @Test
+    fun row_announcesFullTextEvenWhenVisuallyTruncated() {
+        val longTitle = "Título muito longo ".repeat(8)
+        val longDescription = "Descrição muito longa ".repeat(16)
+
+        composeRule.setContent {
+            ListaDeTarefasTheme {
+                TaskRow(
+                    task = task(longTitle, longDescription),
+                    onClick = {},
+                    onEdit = {},
+                    onDelete = {},
+                )
+            }
+        }
+
+        val expected = longTitle + ". " + longDescription
+        composeRule.onNodeWithContentDescription(expected).assertIsDisplayed()
+    }
+
+    @Test
+    fun row_withoutDescription_announcesOnlyTheTitle() {
+        composeRule.setContent {
+            ListaDeTarefasTheme {
+                TaskRow(
+                    task = task("Ligar para o dentista", ""),
+                    onClick = {},
+                    onEdit = {},
+                    onDelete = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithContentDescription("Ligar para o dentista").assertIsDisplayed()
+    }
+
+    @Test
+    fun moreOptionsMenu_exposesEditAndDelete() {
+        composeRule.setContent {
+            ListaDeTarefasTheme {
+                TaskRow(
+                    task = task("Comprar leite", "No mercado"),
+                    onClick = {},
+                    onEdit = {},
+                    onDelete = {},
+                )
+            }
+        }
+
+        composeRule
+            .onNodeWithContentDescription(context.getString(R.string.a11y_more_options))
+            .performClick()
+
+        composeRule.onNodeWithText(context.getString(R.string.menu_edit)).assertIsDisplayed()
+        composeRule.onNodeWithText(context.getString(R.string.delete)).assertIsDisplayed()
+    }
+
+    @Test
+    fun deleteDialog_confirmsOnlyThroughExplicitAction() {
+        var confirmed = false
+        var dismissed = false
+
+        composeRule.setContent {
+            ListaDeTarefasTheme {
+                DeleteTaskDialog(
+                    onConfirm = { confirmed = true },
+                    onDismiss = { dismissed = true },
+                )
+            }
+        }
+
+        composeRule.onNodeWithText(context.getString(R.string.delete_task_title)).assertIsDisplayed()
+        composeRule.onNodeWithText(context.getString(R.string.delete_task_body)).assertIsDisplayed()
+
+        composeRule.onNodeWithText(context.getString(R.string.cancel)).performClick()
+        assertTrue(dismissed)
+        assertTrue(!confirmed)
+
+        composeRule.onNodeWithText(context.getString(R.string.delete)).performClick()
+        assertTrue(confirmed)
+    }
+}
