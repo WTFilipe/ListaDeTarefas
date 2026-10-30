@@ -1,5 +1,7 @@
 package com.foli.listadetarefas.ui.feature.tasks.presentation
 
+import androidx.lifecycle.SavedStateHandle
+
 import app.cash.turbine.test
 import com.foli.listadetarefas.core.analytics.NoOpAnalyticsTracker
 import com.foli.listadetarefas.core.time.TimeSignals
@@ -49,6 +51,7 @@ class TaskListViewModelTest {
         timeProvider = FakeTimeProvider(),
         timeSignals = TimeSignals(),
         analyticsTracker = NoOpAnalyticsTracker(),
+        savedStateHandle = SavedStateHandle(),
     )
 
     @After

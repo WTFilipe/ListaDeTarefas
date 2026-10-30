@@ -110,4 +110,11 @@
     <string name="deadline_a11y_soon">Vence em até 7 dias</string>
     <string name="deadline_a11y_overdue">Atrasada, venceu em %1$s</string>
     <string name="ok">OK</string>
+
+    <!-- Busca (S1, US-06) -->
+    <string name="search_placeholder">Buscar por título ou descrição</string>
+    <string name="search_clear">Limpar busca</string>
+    <string name="empty_search_title">Nenhum resultado</string>
+    <string name="empty_search_echo">Sua busca: “%1$s”</string>
+    <string name="empty_search_body">Tente outra palavra ou limpe a busca.</string>
 </resources>

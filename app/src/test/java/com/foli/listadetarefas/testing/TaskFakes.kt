@@ -1,5 +1,6 @@
 package com.foli.listadetarefas.testing
 
+import com.foli.listadetarefas.core.analytics.AnalyticsTracker
 import com.foli.listadetarefas.core.result.AppFailure
 import com.foli.listadetarefas.core.result.AppResult
 import com.foli.listadetarefas.core.time.TimeProvider
@@ -170,4 +171,22 @@ class FakeTimeProvider(
 ) : TimeProvider {
     override fun today(): LocalDate = todayValue
     override fun nowMillis(): Long = nowMillisValue
+}
+
+/**
+ * Dublê de telemetria da US-06: registra nome e parâmetros para que os testes
+ * provem que a busca nunca envia o texto consultado (ARCHITECTURE §10).
+ */
+class RecordingAnalyticsTracker : AnalyticsTracker {
+
+    data class RecordedEvent(
+        val name: String,
+        val params: Map<String, Any>,
+    )
+
+    val events: MutableList<RecordedEvent> = mutableListOf()
+
+    override fun track(event: String, params: Map<String, Any>) {
+        events += RecordedEvent(event, params)
+    }
 }

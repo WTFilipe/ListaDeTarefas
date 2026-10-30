@@ -1,5 +1,6 @@
 package com.foli.listadetarefas.ui.feature.tasks.presentation
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.foli.listadetarefas.R
@@ -41,8 +42,14 @@ import javax.inject.Inject
  *
  * - Combina a observação de tarefas (todas, já ordenadas) com as preferências
  *   persistidas (aba selecionada) e projeta as linhas por aba.
+ * - A busca (`QueryChanged`/`SearchCleared`) filtra por substring no título ou
+ *   na descrição e é reaplicada a **cada** emissão do Room e a cada ação, de modo
+ *   que criar, editar, concluir ou reabrir na tela do formulário já reflete no
+ *   resultado filtrado ao voltar (US-06 AC 9). O texto digitado fica no
+ *   `SavedStateHandle`, sem persistência em disco (ARCHITECTURE §9.2).
  * - `TabSelected` atualiza o estado imediatamente e persiste em DataStore; a
- *   aba selecionada é restaurada ao reabrir o app.
+ *   aba selecionada é restaurada ao reabrir o app. Trocar de aba preserva a
+ *   consulta, que continua escopada à aba visível.
  * - `CompletionToggled` chama `SetTaskCompletedUseCase` (idempotente) e preserva
  *   todos os campos; em falha de armazenamento emite `ShowStorageError` com a
  *   operação exata para "Tentar novamente".
@@ -63,15 +70,19 @@ class TaskListViewModel @Inject constructor(
     private val timeProvider: TimeProvider,
     private val timeSignals: TimeSignals,
     private val analyticsTracker: AnalyticsTracker,
+    private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(TaskListState())
+    private val _state = MutableStateFlow(
+        TaskListState(query = savedStateHandle.get<String>(KEY_QUERY).orEmpty()),
+    )
     val state: StateFlow<TaskListState> = _state.asStateFlow()
 
     private val _effects = Channel<TaskListEffect>(Channel.BUFFERED)
     val effects: Flow<TaskListEffect> = _effects.receiveAsFlow()
 
     private var observeJob: Job? = null
+    private var searchAnalyticsJob: Job? = null
     private var latestTasks: List<Task> = emptyList()
     private var latestLabels: List<TaskLabel> = emptyList()
 
@@ -84,6 +95,8 @@ class TaskListViewModel @Inject constructor(
         // recomposição após a virada" prevista na US-05 AC 5.
         refreshDeadlines()
         when (action) {
+            is TaskListAction.QueryChanged -> updateQuery(action.value)
+            TaskListAction.SearchCleared -> clearSearch()
             is TaskListAction.TabSelected -> selectTab(action.tab)
             is TaskListAction.CompletionToggled ->
                 toggleCompletion(action.taskId, action.isCompleted)
@@ -130,7 +143,7 @@ class TaskListViewModel @Inject constructor(
                     _state.update { current ->
                         current.copy(
                             tab = tab,
-                            rows = project(tasks, labels, tab, timeProvider.today()),
+                            rows = project(tasks, labels, tab, current.query, timeProvider.today()),
                             isLoading = false,
                             loadFailed = false,
                         )
@@ -143,10 +156,13 @@ class TaskListViewModel @Inject constructor(
         tasks: List<Task>,
         labels: List<TaskLabel>,
         tab: TaskTab,
+        query: String,
         today: java.time.LocalDate,
     ): List<TaskUiModel> {
         val labelById = labels.associateBy { it.id }
-        return TaskFilter.byTab(tasks, tab).map { task ->
+        // `tasks` já chega ordenado por `ObserveTasksUseCase`; filtrar é estável
+        // e não reordena, preservando a ordenação vigente (US-06 AC 4 e 7).
+        return TaskFilter.filterByQuery(TaskFilter.byTab(tasks, tab), query).map { task ->
             TaskUiMapper.toUiModel(
                 task = task,
                 label = task.labelId?.let(labelById::get),
@@ -158,7 +174,72 @@ class TaskListViewModel @Inject constructor(
     private fun refreshDeadlines() {
         _state.update { current ->
             current.copy(
-                rows = project(latestTasks, latestLabels, current.tab, timeProvider.today()),
+                rows = project(
+                    tasks = latestTasks,
+                    labels = latestLabels,
+                    tab = current.tab,
+                    query = current.query,
+                    today = timeProvider.today(),
+                ),
+            )
+        }
+    }
+
+    private fun updateQuery(value: String) {
+        if (_state.value.query == value) return
+        savedStateHandle[KEY_QUERY] = value
+        _state.update { current ->
+            current.copy(
+                query = value,
+                rows = project(
+                    tasks = latestTasks,
+                    labels = latestLabels,
+                    tab = current.tab,
+                    query = value,
+                    today = timeProvider.today(),
+                ),
+            )
+        }
+        scheduleSearchAnalytics(value)
+    }
+
+    private fun clearSearch() {
+        val hadQuery = _state.value.query.isNotBlank()
+        searchAnalyticsJob?.cancel()
+        savedStateHandle[KEY_QUERY] = ""
+        _state.update { current ->
+            current.copy(
+                query = "",
+                rows = project(
+                    tasks = latestTasks,
+                    labels = latestLabels,
+                    tab = current.tab,
+                    query = "",
+                    today = timeProvider.today(),
+                ),
+            )
+        }
+        if (hadQuery) {
+            analyticsTracker.track(
+                AnalyticsEvents.SEARCH_CLEARED,
+                mapOf(ANALYTICS_HAD_QUERY to true),
+            )
+        }
+    }
+
+    /**
+     * `search_performed` só é emitido após 200 ms sem novas teclas e carrega
+     * apenas a contagem de resultados — nunca o texto consultado
+     * (`ARCHITECTURE.md` §10).
+     */
+    private fun scheduleSearchAnalytics(query: String) {
+        searchAnalyticsJob?.cancel()
+        if (query.isBlank()) return
+        searchAnalyticsJob = viewModelScope.launch {
+            delay(SEARCH_DEBOUNCE_MS)
+            analyticsTracker.track(
+                AnalyticsEvents.SEARCH_PERFORMED,
+                mapOf(ANALYTICS_RESULT_COUNT to _state.value.rows.size),
             )
         }
     }
@@ -168,7 +249,13 @@ class TaskListViewModel @Inject constructor(
         _state.update { current ->
             current.copy(
                 tab = tab,
-                rows = project(latestTasks, latestLabels, tab, timeProvider.today()),
+                rows = project(
+                    tasks = latestTasks,
+                    labels = latestLabels,
+                    tab = tab,
+                    query = current.query,
+                    today = timeProvider.today(),
+                ),
             )
         }
         viewModelScope.launch { setSelectedTabUseCase(tab) }
@@ -224,5 +311,9 @@ class TaskListViewModel @Inject constructor(
 
     private companion object {
         const val LOADING_DELAY_MS = 200L
+        const val SEARCH_DEBOUNCE_MS = 200L
+        const val KEY_QUERY = "task_list_query"
+        const val ANALYTICS_RESULT_COUNT = "result_count"
+        const val ANALYTICS_HAD_QUERY = "had_query"
     }
 }
