@@ -98,6 +98,11 @@ object AppIcons {
             "11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z",
     )
 
+    val Sort: ImageVector = icon(
+        name = "Sort",
+        pathData = "M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z",
+    )
+
     private fun icon(name: String, pathData: String): ImageVector {
         val nodes = PathParser().parsePathString(pathData).toNodes()
         return ImageVector.Builder(

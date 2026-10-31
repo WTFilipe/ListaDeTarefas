@@ -339,13 +339,6 @@ class ArchitectureRulesTest {
 
         val missing = required - declared
         assertTrue("Strings da US-01 ausentes: $missing", missing.isEmpty())
-
-        val laterStories = setOf(
-            "sort_label",
-            "sort_sheet_title",
-        )
-        val leaked = laterStories intersect declared
-        assertTrue("Strings de histórias posteriores não pertencem à US-01: $leaked", leaked.isEmpty())
     }
 
     @Test
@@ -442,10 +435,26 @@ class ArchitectureRulesTest {
         )
         val missing = required - declared
         assertTrue("Strings da US-06 ausentes: $missing", missing.isEmpty())
+    }
 
-        val sortKeys = setOf("sort_label", "sort_sheet_title")
-        val leaked = sortKeys intersect declared
-        assertTrue("Strings da US-07 não pertencem à US-06: $leaked", leaked.isEmpty())
+    @Test
+    fun strings_containUs07SortKeys() {
+        val strings = moduleDir.resolve("src/main/res/values/strings.xml")
+        assertTrue("strings.xml ausente", strings.exists())
+        val declared = Regex("""<string\s+name="([^"]+)"""")
+            .findAll(strings.readText())
+            .map { it.groupValues[1] }
+            .toSet()
+
+        val required = setOf(
+            "sort_label", "sort_sheet_title",
+            "sort_title_az", "sort_title_za",
+            "sort_created_desc", "sort_created_asc",
+            "sort_deadline_asc", "sort_deadline_desc",
+            "a11y_sort_current",
+        )
+        val missing = required - declared
+        assertTrue("Strings da US-07 ausentes: $missing", missing.isEmpty())
     }
 
     // ------------------------------------------------------------------
