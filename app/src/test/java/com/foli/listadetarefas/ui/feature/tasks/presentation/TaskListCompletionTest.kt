@@ -1,5 +1,7 @@
 package com.foli.listadetarefas.ui.feature.tasks.presentation
 
+import androidx.lifecycle.SavedStateHandle
+
 import app.cash.turbine.test
 import com.foli.listadetarefas.R
 import com.foli.listadetarefas.core.analytics.NoOpAnalyticsTracker
@@ -56,6 +58,7 @@ class TaskListCompletionTest {
         timeProvider = FakeTimeProvider(nowMillisValue = 5_000L),
         timeSignals = TimeSignals(),
         analyticsTracker = NoOpAnalyticsTracker(),
+        savedStateHandle = SavedStateHandle(),
     )
 
     @After

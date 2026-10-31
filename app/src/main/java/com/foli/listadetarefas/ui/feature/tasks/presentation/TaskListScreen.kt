@@ -40,6 +40,7 @@ import com.foli.listadetarefas.ui.UiText
 import com.foli.listadetarefas.ui.designsystem.components.ActionTopAppBar
 import com.foli.listadetarefas.ui.designsystem.components.EmptyState
 import com.foli.listadetarefas.ui.designsystem.components.ErrorBanner
+import com.foli.listadetarefas.ui.designsystem.components.SearchField
 import com.foli.listadetarefas.ui.designsystem.components.TaskRow
 import com.foli.listadetarefas.ui.designsystem.icons.AppIcons
 import com.foli.listadetarefas.ui.feature.tasks.presentation.components.DeleteTaskDialog
@@ -83,6 +84,8 @@ fun TaskListRoute(
     TaskListScreen(
         state = state,
         snackbarHostState = snackbarHostState,
+        onQueryChange = { value -> viewModel.onAction(TaskListAction.QueryChanged(value)) },
+        onSearchClear = { viewModel.onAction(TaskListAction.SearchCleared) },
         onTabSelected = { tab -> viewModel.onAction(TaskListAction.TabSelected(tab)) },
         onCompletionToggled = { taskId, isCompleted ->
             viewModel.onAction(TaskListAction.CompletionToggled(taskId, isCompleted))
@@ -102,6 +105,8 @@ fun TaskListRoute(
 private fun TaskListScreen(
     state: TaskListState,
     snackbarHostState: SnackbarHostState,
+    onQueryChange: (String) -> Unit,
+    onSearchClear: () -> Unit,
     onTabSelected: (TaskTab) -> Unit,
     onCompletionToggled: (String, Boolean) -> Unit,
     onNewTask: () -> Unit,
@@ -113,11 +118,16 @@ private fun TaskListScreen(
     onDeleteDismiss: () -> Unit,
     onRetryLoad: () -> Unit,
 ) {
-    val isActiveTabEmpty = state.rows.isEmpty() &&
+    val trimmedQuery = state.query.trim()
+    val hasQuery = trimmedQuery.isNotEmpty()
+    // O FAB só é ocultado no empty real da lista ativa, que tem CTA própria
+    // (DESIGN_SPEC §2.2/§9.2). O empty de busca mantém o FAB.
+    val isPlainActiveEmpty = state.rows.isEmpty() &&
         !state.isLoading &&
         !state.loadFailed &&
-        state.tab == TaskTab.ACTIVE
-    val showFab = !isActiveTabEmpty
+        state.tab == TaskTab.ACTIVE &&
+        !hasQuery
+    val showFab = !isPlainActiveEmpty
 
     Scaffold(
         topBar = {
@@ -153,6 +163,15 @@ private fun TaskListScreen(
                 .fillMaxSize()
                 .padding(innerPadding),
         ) {
+            // Chrome de S1: app bar, busca e abas permanecem em todos os estados
+            // (DESIGN_SPEC §2.2/§8.2). Só o corpo central troca.
+            SearchField(
+                query = state.query,
+                onQueryChange = onQueryChange,
+                onClear = onSearchClear,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            )
+
             TaskTabs(
                 selectedTab = state.tab,
                 onTabSelected = onTabSelected,
@@ -178,16 +197,27 @@ private fun TaskListScreen(
                     }
                 }
             } else if (state.rows.isEmpty()) {
-                if (state.tab == TaskTab.ACTIVE) {
-                    EmptyState(
+                when {
+                    // O empty de busca tem prioridade sobre o empty da aba
+                    // (DESIGN_SPEC §8.2) e mantém o texto buscado visível.
+                    hasQuery -> EmptyState(
+                        title = stringResource(R.string.empty_search_title),
+                        echo = stringResource(R.string.empty_search_echo, trimmedQuery),
+                        body = stringResource(R.string.empty_search_body),
+                        icon = AppIcons.Search,
+                        actionLabel = stringResource(R.string.search_clear),
+                        onAction = onSearchClear,
+                        isActionTonal = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    state.tab == TaskTab.ACTIVE -> EmptyState(
                         title = stringResource(R.string.empty_active_title),
                         body = stringResource(R.string.empty_active_body),
                         actionLabel = stringResource(R.string.new_task),
                         onAction = onNewTask,
                         modifier = Modifier.fillMaxWidth(),
                     )
-                } else {
-                    EmptyState(
+                    else -> EmptyState(
                         title = stringResource(R.string.empty_completed_title),
                         body = stringResource(R.string.empty_completed_body),
                         modifier = Modifier.fillMaxWidth(),
