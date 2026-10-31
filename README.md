@@ -141,25 +141,24 @@ As decisões arquiteturais estão registradas em
 único por camadas, MVI, Hilt com KSP, Room + DataStore, normalização pt-BR e
 design system local.
 
-## Status e branch de trabalho
+## Status e histórico de branches
 
 O desenvolvimento foi conduzido em histórias (`US-01` a `US-07`) em branches
-`squad/*`, com MRs empilhados (um por tarefa + um de integração por história),
-sem merge automático:
+`squad/*`, com MRs empilhados (um por tarefa + um de integração por história).
+Todo o trabalho está consolidado em `master`:
 
 | História | Escopo | Situação |
 |:--|:--|:--|
 | US-01 | CRUD de tarefas com persistência | Integrada em `master` (PR #1) |
 | US-02 | Limites e contadores de texto | Integrada em `master` (PR #2) |
-| US-03 | Conclusão e aba Concluídas | PR aberto (stack) |
-| US-04 | Etiquetas com paleta fixa | PR aberto (stack) |
-| US-05 | Data limite e indicador de prazo | PR aberto (stack) |
-| US-06 | Busca por título e descrição | PR aberto (stack) |
-| US-07 | Ordenação da lista | PR aberto (stack) |
+| US-03 | Conclusão e aba Concluídas | Integrada em `master` |
+| US-04 | Etiquetas com paleta fixa | Integrada em `master` |
+| US-05 | Data limite e indicador de prazo | Integrada em `master` |
+| US-06 | Busca por título e descrição | Integrada em `master` |
+| US-07 | Ordenação da lista | Integrada em `master` |
 
-Os MRs da stack precisam ser mesclados de baixo para cima
-(`squad/us-03` → ... → `squad/us-07`); o MR de integração da US-07 não deve ir
-para `master` antes das histórias anteriores.
+As branches `squad/*` e os MRs (#4 a #12) ficam como registro do processo; a
+`master` é a fonte de verdade do código e do README.
 
 ## Privacidade
 
