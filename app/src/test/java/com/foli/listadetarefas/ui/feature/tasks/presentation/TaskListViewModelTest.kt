@@ -9,6 +9,7 @@ import com.foli.listadetarefas.domain.model.Task
 import com.foli.listadetarefas.domain.usecase.label.ObserveLabelsUseCase
 import com.foli.listadetarefas.domain.usecase.preferences.ObserveUserPreferencesUseCase
 import com.foli.listadetarefas.domain.usecase.preferences.SetSelectedTabUseCase
+import com.foli.listadetarefas.domain.usecase.preferences.SetSortOrderUseCase
 import com.foli.listadetarefas.domain.usecase.task.DeleteTaskUseCase
 import com.foli.listadetarefas.domain.usecase.task.ObserveTasksUseCase
 import com.foli.listadetarefas.domain.usecase.task.SetTaskCompletedUseCase
@@ -48,6 +49,7 @@ class TaskListViewModelTest {
         setTaskCompletedUseCase = SetTaskCompletedUseCase(repository, FakeTimeProvider()),
         observeUserPreferencesUseCase = ObserveUserPreferencesUseCase(preferences),
         setSelectedTabUseCase = SetSelectedTabUseCase(preferences),
+        setSortOrderUseCase = SetSortOrderUseCase(preferences),
         timeProvider = FakeTimeProvider(),
         timeSignals = TimeSignals(),
         analyticsTracker = NoOpAnalyticsTracker(),
