@@ -133,10 +133,13 @@ O APK de debug é gerado em `app/build/outputs/apk/debug/`.
 |:--|:--|
 | `app/` | Código-fonte do aplicativo (`src/main`), testes (`src/test`, `src/androidTest`) e schemas do Room |
 | `gradle/libs.versions.toml` | Catálogo de versões e dependências |
-| `.squad/` | Documentação do processo: pedido, PRD, design spec, arquitetura, ADRs, planos e revisões |
 | `settings.gradle.kts` | Configuração do projeto e repositórios |
 
-As decisões arquiteturais estão registradas em
+Pastas de ferramentas como `.idea/` (configurações do Android Studio) e `.squad/`
+(artefatos do processo da squad) são geradas localmente, estão no `.gitignore` e
+não são necessárias para compilar o projeto.
+
+As decisões arquiteturais são registradas localmente em
 `.squad/artifacts/architecture/adr/` (ADR-0001 a ADR-0012), incluindo módulo
 único por camadas, MVI, Hilt com KSP, Room + DataStore, normalização pt-BR e
 design system local.
@@ -168,11 +171,7 @@ do usuário nunca são escritos em logs ou eventos de analytics.
 
 ## Documentação do processo
 
-Este repositório também registra o processo de desenvolvimento assistido por uma
-squad de agentes em `.squad/`:
-
-- `artifacts/product/` — requisição, PRD e backlog (`STORIES.json`);
-- `artifacts/design/` — color scheme, design spec MD3 e preview;
-- `artifacts/architecture/` — perfil técnico, arquitetura e ADRs;
-- `artifacts/traceability/` — matriz de rastreabilidade história × entrega;
-- `stories/US-XX/` — planos, implementações, revisões e MRs por história.
+O processo de desenvolvimento assistido por uma squad de agentes é mantido
+localmente em `.squad/` (requisição, PRD, design spec, arquitetura, ADRs,
+backlog, planos, revisões e rastreabilidade). Essa pasta é gerada pelo framework
+da squad, fica fora do versionamento e não é necessária para compilar o app.
