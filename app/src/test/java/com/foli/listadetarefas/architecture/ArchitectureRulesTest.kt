@@ -339,14 +339,6 @@ class ArchitectureRulesTest {
 
         val missing = required - declared
         assertTrue("Strings da US-01 ausentes: $missing", missing.isEmpty())
-
-        val laterStories = setOf(
-            "tab_active", "tab_completed", "search_placeholder", "sort_label",
-            "sort_sheet_title", "label_none", "labels_title",
-            "deadline_section", "completed_on", "a11y_checkbox_completed",
-        )
-        val leaked = laterStories intersect declared
-        assertTrue("Strings de histórias posteriores não pertencem à US-01: $leaked", leaked.isEmpty())
     }
 
     @Test
@@ -361,6 +353,108 @@ class ArchitectureRulesTest {
         val required = setOf("counter_format", "support_limit_reached")
         val missing = required - declared
         assertTrue("Strings da US-02 ausentes: $missing", missing.isEmpty())
+    }
+
+    @Test
+    fun strings_containUs03CompletionAndTabKeys() {
+        val strings = moduleDir.resolve("src/main/res/values/strings.xml")
+        assertTrue("strings.xml ausente", strings.exists())
+        val declared = Regex("""<string\s+name="([^"]+)"""")
+            .findAll(strings.readText())
+            .map { it.groupValues[1] }
+            .toSet()
+
+        val required = setOf(
+            "tab_active", "tab_completed",
+            "empty_completed_title", "empty_completed_body",
+            "completed_on", "completed_on_a11y",
+            "a11y_checkbox_completed", "a11y_checkbox_not_completed",
+            "a11y_mark_completed", "a11y_reopen",
+            "a11y_switch_tab_active", "a11y_switch_tab_completed",
+        )
+        val missing = required - declared
+        assertTrue("Strings da US-03 ausentes: $missing", missing.isEmpty())
+    }
+
+    @Test
+    fun strings_containUs04LabelKeys() {
+        val strings = moduleDir.resolve("src/main/res/values/strings.xml")
+        assertTrue("strings.xml ausente", strings.exists())
+        val declared = Regex("""<string\s+name="([^"]+)"""")
+            .findAll(strings.readText())
+            .map { it.groupValues[1] }
+            .toSet()
+
+        val required = setOf(
+            "labels_title", "label_new", "label_edit", "label_name_label",
+            "label_name_required", "label_name_duplicate", "label_color_section",
+            "label_delete_title", "label_delete_body", "empty_labels_title",
+            "empty_labels_body", "selector_empty_labels", "labels_load_error",
+            "a11y_loading_labels", "a11y_more_options_label", "a11y_label",
+            "a11y_label_color", "a11y_selected", "support_max_chars",
+            "label_section", "label_none", "label_create_shortcut",
+            "color_name_red", "color_name_orange", "color_name_mustard",
+            "color_name_green", "color_name_teal", "color_name_blue",
+            "color_name_purple", "color_name_pink",
+        )
+        val missing = required - declared
+        assertTrue("Strings da US-04 ausentes: $missing", missing.isEmpty())
+    }
+
+    @Test
+    fun strings_containUs05DeadlineKeys() {
+        val strings = moduleDir.resolve("src/main/res/values/strings.xml")
+        assertTrue("strings.xml ausente", strings.exists())
+        val declared = Regex("""<string\s+name="([^"]+)"""")
+            .findAll(strings.readText())
+            .map { it.groupValues[1] }
+            .toSet()
+
+        val required = setOf(
+            "deadline_section", "deadline_action_set", "deadline_remove",
+            "deadline_overdue", "deadline_today", "deadline_tomorrow",
+            "deadline_soon", "deadline_a11y_today", "deadline_a11y_tomorrow",
+            "deadline_a11y_soon", "deadline_a11y_overdue", "ok",
+        )
+        val missing = required - declared
+        assertTrue("Strings da US-05 ausentes: $missing", missing.isEmpty())
+    }
+
+    @Test
+    fun strings_containUs06SearchKeys() {
+        val strings = moduleDir.resolve("src/main/res/values/strings.xml")
+        assertTrue("strings.xml ausente", strings.exists())
+        val declared = Regex("""<string\s+name="([^"]+)"""")
+            .findAll(strings.readText())
+            .map { it.groupValues[1] }
+            .toSet()
+
+        val required = setOf(
+            "search_placeholder", "search_clear",
+            "empty_search_title", "empty_search_echo", "empty_search_body",
+        )
+        val missing = required - declared
+        assertTrue("Strings da US-06 ausentes: $missing", missing.isEmpty())
+    }
+
+    @Test
+    fun strings_containUs07SortKeys() {
+        val strings = moduleDir.resolve("src/main/res/values/strings.xml")
+        assertTrue("strings.xml ausente", strings.exists())
+        val declared = Regex("""<string\s+name="([^"]+)"""")
+            .findAll(strings.readText())
+            .map { it.groupValues[1] }
+            .toSet()
+
+        val required = setOf(
+            "sort_label", "sort_sheet_title",
+            "sort_title_az", "sort_title_za",
+            "sort_created_desc", "sort_created_asc",
+            "sort_deadline_asc", "sort_deadline_desc",
+            "a11y_sort_current",
+        )
+        val missing = required - declared
+        assertTrue("Strings da US-07 ausentes: $missing", missing.isEmpty())
     }
 
     // ------------------------------------------------------------------

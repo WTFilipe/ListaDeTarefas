@@ -1,6 +1,10 @@
 package com.foli.listadetarefas.di
 
+import com.foli.listadetarefas.data.repository.LabelRepositoryImpl
+import com.foli.listadetarefas.data.repository.PreferencesRepositoryImpl
 import com.foli.listadetarefas.data.repository.TaskRepositoryImpl
+import com.foli.listadetarefas.domain.repository.LabelRepository
+import com.foli.listadetarefas.domain.repository.PreferencesRepository
 import com.foli.listadetarefas.domain.repository.TaskRepository
 import dagger.Binds
 import dagger.Module
@@ -15,4 +19,12 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindTaskRepository(impl: TaskRepositoryImpl): TaskRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPreferencesRepository(impl: PreferencesRepositoryImpl): PreferencesRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindLabelRepository(impl: LabelRepositoryImpl): LabelRepository
 }

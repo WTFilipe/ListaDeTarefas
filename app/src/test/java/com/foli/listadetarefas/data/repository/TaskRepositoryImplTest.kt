@@ -83,6 +83,49 @@ class TaskRepositoryImplTest {
     }
 
     @Test
+    fun setCompleted_onlyChangesCompletionAndKeepsCreatedAt() = runTest {
+        val dao = FakeTaskDao()
+        val repository = repository(dao, StandardTestDispatcher(testScheduler))
+        repository.upsert(task("id-1", 100L, title = "Preservada"))
+
+        repository.setCompleted("id-1", 999L)
+
+        val stored = repository.observeTasks().first().single()
+        assertEquals(999L, stored.completedAt)
+        assertEquals(100L, stored.createdAt)
+        assertEquals("Preservada", stored.title)
+    }
+
+    @Test
+    fun setCompleted_withNull_reopensTask() = runTest {
+        val dao = FakeTaskDao()
+        val repository = repository(dao, StandardTestDispatcher(testScheduler))
+        repository.upsert(task("id-1", 100L))
+        repository.setCompleted("id-1", 999L)
+
+        repository.setCompleted("id-1", null)
+
+        assertEquals(null, repository.observeTasks().first().single().completedAt)
+    }
+
+    @Test
+    fun setLabel_onlyChangesLabelAndKeepsOtherFields() = runTest {
+        val dao = FakeTaskDao()
+        val repository = repository(dao, StandardTestDispatcher(testScheduler))
+        repository.upsert(task("id-1", 100L, title = "Preservada"))
+
+        repository.setLabel("id-1", "label-1")
+
+        val stored = repository.observeTasks().first().single()
+        assertEquals("label-1", stored.labelId)
+        assertEquals("Preservada", stored.title)
+        assertEquals(100L, stored.createdAt)
+
+        repository.setLabel("id-1", null)
+        assertEquals(null, repository.observeTasks().first().single().labelId)
+    }
+
+    @Test
     fun storageFailure_isConvertedToStorageUnavailable() = runTest {
         val dao = FakeTaskDao().apply { failWrites = true }
         val repository = repository(dao, StandardTestDispatcher(testScheduler))
@@ -116,6 +159,33 @@ class TaskRepositoryImplTest {
         override suspend fun deleteById(id: String) {
             if (failWrites) throw IllegalStateException("falha de exclusão simulada")
             rows.update { list -> list.filterNot { it.id == id } }
+        }
+
+        override suspend fun setCompleted(id: String, completedAt: Long?) {
+            if (failWrites) throw IllegalStateException("falha de conclusão simulada")
+            rows.update { list ->
+                list.map { entity ->
+                    if (entity.id == id) entity.copy(completedAt = completedAt) else entity
+                }
+            }
+        }
+
+        override suspend fun setLabel(id: String, labelId: String?) {
+            if (failWrites) throw IllegalStateException("falha de etiqueta simulada")
+            rows.update { list ->
+                list.map { entity ->
+                    if (entity.id == id) entity.copy(labelId = labelId) else entity
+                }
+            }
+        }
+
+        override suspend fun clearLabel(labelId: String) {
+            if (failWrites) throw IllegalStateException("falha de limpeza simulada")
+            rows.update { list ->
+                list.map { entity ->
+                    if (entity.labelId == labelId) entity.copy(labelId = null) else entity
+                }
+            }
         }
     }
 }

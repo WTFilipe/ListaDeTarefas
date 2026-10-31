@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.foli.listadetarefas.ui.feature.editor.presentation.TaskEditorRoute
+import com.foli.listadetarefas.ui.feature.labels.presentation.LabelListRoute
 import com.foli.listadetarefas.ui.feature.tasks.presentation.TaskListRoute
 
 /**
@@ -24,10 +25,18 @@ fun AppNavHost(navController: NavHostController = rememberNavController()) {
                 onNavigateToEditor = { taskId ->
                     navController.navigate(AppDestination.TaskEditor(taskId))
                 },
+                onNavigateToLabels = {
+                    navController.navigate(AppDestination.Labels)
+                },
             )
         }
         composable<AppDestination.TaskEditor> {
             TaskEditorRoute(
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+        composable<AppDestination.Labels> {
+            LabelListRoute(
                 onNavigateBack = { navController.popBackStack() },
             )
         }

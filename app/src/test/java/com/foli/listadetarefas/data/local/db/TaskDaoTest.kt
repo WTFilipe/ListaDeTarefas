@@ -21,7 +21,11 @@ class TaskDaoTest {
     fun dao_exposesReactiveReadsAndIdempotentWrites() {
         val methods = TaskDao::class.java.declaredMethods.map { it.name }.toSet()
 
-        assertTrue(methods.containsAll(listOf("observeAll", "observeById", "getById", "upsert", "deleteById")))
+        assertTrue(
+            methods.containsAll(
+                listOf("observeAll", "observeById", "getById", "upsert", "deleteById", "setCompleted"),
+            ),
+        )
     }
 
     @Test

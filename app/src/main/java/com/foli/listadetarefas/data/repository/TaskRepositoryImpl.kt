@@ -44,6 +44,12 @@ class TaskRepositoryImpl @Inject constructor(
     override suspend fun deleteById(id: String): AppResult<Unit> =
         guard { taskDao.deleteById(id) }
 
+    override suspend fun setCompleted(id: String, completedAt: Long?): AppResult<Unit> =
+        guard { taskDao.setCompleted(id, completedAt) }
+
+    override suspend fun setLabel(id: String, labelId: String?): AppResult<Unit> =
+        guard { taskDao.setLabel(id, labelId) }
+
     private suspend fun <T> guard(block: suspend () -> T): AppResult<T> =
         withContext(ioDispatcher) {
             try {

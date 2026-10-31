@@ -1,9 +1,16 @@
 package com.foli.listadetarefas.testing
 
+import com.foli.listadetarefas.core.analytics.AnalyticsTracker
 import com.foli.listadetarefas.core.result.AppFailure
 import com.foli.listadetarefas.core.result.AppResult
 import com.foli.listadetarefas.core.time.TimeProvider
 import com.foli.listadetarefas.domain.model.Task
+import com.foli.listadetarefas.domain.model.TaskLabel
+import com.foli.listadetarefas.domain.model.TaskTab
+import com.foli.listadetarefas.domain.model.SortOrder
+import com.foli.listadetarefas.domain.model.UserPreferences
+import com.foli.listadetarefas.domain.repository.LabelRepository
+import com.foli.listadetarefas.domain.repository.PreferencesRepository
 import com.foli.listadetarefas.domain.repository.TaskRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -12,6 +19,7 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import java.io.IOException
 import java.time.LocalDate
 
 /**
@@ -26,8 +34,11 @@ class FakeTaskRepository : TaskRepository {
 
     var upsertCalls: Int = 0
     var deleteCalls: Int = 0
+    var setCompletedCalls: Int = 0
     var failUpsert: Boolean = false
     var failDelete: Boolean = false
+    var failSetCompleted: Boolean = false
+    var failSetLabel: Boolean = false
     var failRead: Boolean = false
     var readDelayMillis: Long = 0L
 
@@ -68,13 +79,130 @@ class FakeTaskRepository : TaskRepository {
         tasks.update { list -> list.filterNot { it.id == id } }
         return AppResult.Success(Unit)
     }
+
+    override suspend fun setCompleted(id: String, completedAt: Long?): AppResult<Unit> {
+        setCompletedCalls++
+        if (failSetCompleted) return AppResult.Failure(AppFailure.StorageUnavailable)
+        tasks.update { list ->
+            list.map { task -> if (task.id == id) task.copy(completedAt = completedAt) else task }
+        }
+        return AppResult.Success(Unit)
+    }
+
+    override suspend fun setLabel(id: String, labelId: String?): AppResult<Unit> {
+        if (failSetLabel) return AppResult.Failure(AppFailure.StorageUnavailable)
+        tasks.update { list ->
+            list.map { task -> if (task.id == id) task.copy(labelId = labelId) else task }
+        }
+        return AppResult.Success(Unit)
+    }
+}
+
+/** Dublê em memória do contrato de etiquetas (US-04). */
+class FakeLabelRepository : LabelRepository {
+
+    val labels = MutableStateFlow<List<TaskLabel>>(emptyList())
+
+    var upsertCalls: Int = 0
+    var deleteCalls: Int = 0
+    var failUpsert: Boolean = false
+    var failDelete: Boolean = false
+    var failRead: Boolean = false
+    var readDelayMillis: Long = 0L
+
+    override fun observeLabels(): Flow<List<TaskLabel>> =
+        if (failRead) {
+            flow { throw IllegalStateException("falha de armazenamento simulada") }
+        } else {
+            flow {
+                if (readDelayMillis > 0L) delay(readDelayMillis)
+                emitAll(labels)
+            }
+        }
+
+    override suspend fun getLabelById(id: String): AppResult<TaskLabel?> =
+        if (failRead) {
+            AppResult.Failure(AppFailure.StorageUnavailable)
+        } else {
+            AppResult.Success(labels.value.firstOrNull { it.id == id })
+        }
+
+    override suspend fun getByNormalizedNameKey(nameKey: String): AppResult<TaskLabel?> =
+        if (failRead) {
+            AppResult.Failure(AppFailure.StorageUnavailable)
+        } else {
+            AppResult.Success(labels.value.firstOrNull { it.nameKey == nameKey })
+        }
+
+    override suspend fun upsert(label: TaskLabel): AppResult<Unit> {
+        upsertCalls++
+        if (failUpsert) return AppResult.Failure(AppFailure.StorageUnavailable)
+        val duplicate = labels.value.any {
+            it.nameKey == label.nameKey && it.id != label.id
+        }
+        if (duplicate) return AppResult.Failure(AppFailure.DuplicateLabelName)
+        labels.update { list -> list.filterNot { it.id == label.id } + label }
+        return AppResult.Success(Unit)
+    }
+
+    override suspend fun deleteById(id: String): AppResult<Unit> {
+        deleteCalls++
+        if (failDelete) return AppResult.Failure(AppFailure.StorageUnavailable)
+        labels.update { list -> list.filterNot { it.id == id } }
+        return AppResult.Success(Unit)
+    }
 }
 
 /** Tempo determinístico: nenhum teste depende do relógio real. */
+class FakePreferencesRepository : PreferencesRepository {
+
+    val preferences = MutableStateFlow(UserPreferences())
+    var setSelectedTabCalls: Int = 0
+    var setSortOrderCalls: Int = 0
+
+    /** Simula demora de I/O na gravação para testar emissões intercaladas (M6). */
+    var setSortOrderDelayMillis: Long = 0L
+
+    /** Simula falha de I/O do DataStore na gravação da ordenação (M4). */
+    var failSetSortOrder: Boolean = false
+
+    override fun observePreferences(): Flow<UserPreferences> = preferences
+
+    override suspend fun setSelectedTab(tab: TaskTab) {
+        setSelectedTabCalls++
+        preferences.update { it.copy(selectedTab = tab) }
+    }
+
+    override suspend fun setSortOrder(order: SortOrder) {
+        setSortOrderCalls++
+        if (setSortOrderDelayMillis > 0L) delay(setSortOrderDelayMillis)
+        if (failSetSortOrder) throw IOException("falha de persistência simulada")
+        preferences.update { it.copy(sortOrder = order) }
+    }
+}
+
 class FakeTimeProvider(
     var nowMillisValue: Long = 1_000L,
     var todayValue: LocalDate = LocalDate.of(2026, 1, 1),
 ) : TimeProvider {
     override fun today(): LocalDate = todayValue
     override fun nowMillis(): Long = nowMillisValue
+}
+
+/**
+ * Dublê de telemetria da US-06: registra nome e parâmetros para que os testes
+ * provem que a busca nunca envia o texto consultado (ARCHITECTURE §10).
+ */
+class RecordingAnalyticsTracker : AnalyticsTracker {
+
+    data class RecordedEvent(
+        val name: String,
+        val params: Map<String, Any>,
+    )
+
+    val events: MutableList<RecordedEvent> = mutableListOf()
+
+    override fun track(event: String, params: Map<String, Any>) {
+        events += RecordedEvent(event, params)
+    }
 }

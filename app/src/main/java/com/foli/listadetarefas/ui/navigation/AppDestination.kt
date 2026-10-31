@@ -14,4 +14,7 @@ sealed interface AppDestination {
 
     @Serializable
     data class TaskEditor(val taskId: String? = null) : AppDestination
+
+    @Serializable
+    data object Labels : AppDestination
 }

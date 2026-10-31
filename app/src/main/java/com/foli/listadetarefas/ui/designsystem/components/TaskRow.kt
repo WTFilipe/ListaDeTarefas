@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -24,18 +25,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.foli.listadetarefas.R
 import com.foli.listadetarefas.ui.designsystem.icons.AppIcons
+import com.foli.listadetarefas.ui.model.DeadlineUiState
 import com.foli.listadetarefas.ui.model.TaskUiModel
 
 /**
- * Linha da tarefa: título e descrição em até 2 linhas com reticências, sem
- * segundo texto quando não há descrição. A semântica carrega o texto **integral**
- * (mergeDescendants + contentDescription) para que o truncamento visual não perca
- * informação no TalkBack. O menu ⋮ expõe "Editar" e "Excluir".
+ * Linha da tarefa: checkbox de conclusão com alvo de 48dp, título e descrição em
+ * até 2 linhas com reticências, sem segundo texto quando não há descrição e, para
+ * tarefas concluídas, título riscado + marca "Concluída em dd/MM/aaaa". A
+ * semântica carrega o texto **integral** (mergeDescendants + contentDescription)
+ * para que o truncamento visual não perca informação no TalkBack, incluindo o
+ * estado de prazo (US-05 AC 4). O menu ⋮ expõe "Editar" e "Excluir".
  */
 @Composable
 fun TaskRow(
@@ -43,24 +50,69 @@ fun TaskRow(
     onClick: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
+    onToggle: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val title = task.title
     val description = task.description
-    val semanticsText = if (description.isBlank()) {
+    val baseSemanticsText = if (description.isBlank()) {
         title
     } else {
         stringResource(R.string.a11y_task, title, description)
     }
+    val labelText = task.label?.let {
+        stringResource(R.string.a11y_label, it.name)
+    }
+    val withLabelText = labelText?.let {
+        stringResource(R.string.a11y_task, baseSemanticsText, it)
+    } ?: baseSemanticsText
+    val deadlineText = when (task.deadline) {
+        DeadlineUiState.OVERDUE -> task.deadlineDateLabel?.let {
+            stringResource(R.string.deadline_a11y_overdue, it)
+        } ?: stringResource(R.string.deadline_overdue)
+        DeadlineUiState.TODAY -> stringResource(R.string.deadline_a11y_today)
+        DeadlineUiState.TOMORROW -> stringResource(R.string.deadline_a11y_tomorrow)
+        DeadlineUiState.SOON -> stringResource(R.string.deadline_a11y_soon)
+        null -> null
+    }
+    val withDeadlineText = deadlineText?.let {
+        stringResource(R.string.a11y_task, withLabelText, it)
+    } ?: withLabelText
+    val completedLabel = task.completedOnDate?.let {
+        stringResource(R.string.completed_on_a11y, it)
+    }
+    val semanticsText = completedLabel?.let {
+        stringResource(R.string.a11y_task, withDeadlineText, it)
+    } ?: withDeadlineText
     val editLabel = stringResource(R.string.a11y_edit_task)
+    val checkboxState = stringResource(
+        if (task.isCompleted) R.string.a11y_checkbox_completed else R.string.a11y_checkbox_not_completed,
+    )
+    val toggleLabel = stringResource(
+        if (task.isCompleted) R.string.a11y_reopen else R.string.a11y_mark_completed,
+    )
 
     Row(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 72.dp)
-            .padding(start = 16.dp),
+            .padding(start = 4.dp, end = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        Checkbox(
+            checked = task.isCompleted,
+            onCheckedChange = onToggle,
+            modifier = Modifier
+                .size(48.dp)
+                .semantics {
+                    stateDescription = checkboxState
+                    onClick(label = toggleLabel) {
+                        onToggle(!task.isCompleted)
+                        true
+                    }
+                },
+        )
+
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -73,7 +125,12 @@ fun TaskRow(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = if (task.isCompleted) {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                },
+                textDecoration = if (task.isCompleted) TextDecoration.LineThrough else null,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -85,6 +142,33 @@ fun TaskRow(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
+            }
+            if (task.label != null || task.completedOnDate != null || task.deadline != null) {
+                Row(
+                    modifier = Modifier.padding(top = 4.dp),
+                ) {
+                    LabelChip(label = task.label)
+                    if (task.label != null &&
+                        (task.completedOnDate != null || task.deadline != null)
+                    ) {
+                        androidx.compose.foundation.layout.Spacer(
+                            modifier = Modifier.size(4.dp),
+                        )
+                    }
+                    DeadlineBadge(deadline = task.deadline)
+                    if (task.completedOnDate != null) {
+                        if (task.label != null) {
+                            androidx.compose.foundation.layout.Spacer(
+                                modifier = Modifier.size(4.dp),
+                            )
+                        }
+                        Text(
+                            text = stringResource(R.string.completed_on, task.completedOnDate),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
             }
         }
 

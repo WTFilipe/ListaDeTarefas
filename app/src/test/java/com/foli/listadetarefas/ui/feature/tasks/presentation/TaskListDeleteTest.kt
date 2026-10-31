@@ -1,12 +1,23 @@
 package com.foli.listadetarefas.ui.feature.tasks.presentation
 
+import androidx.lifecycle.SavedStateHandle
+
 import app.cash.turbine.test
 import com.foli.listadetarefas.R
 import com.foli.listadetarefas.core.analytics.NoOpAnalyticsTracker
+import com.foli.listadetarefas.core.time.TimeSignals
 import com.foli.listadetarefas.domain.model.Task
+import com.foli.listadetarefas.domain.usecase.label.ObserveLabelsUseCase
+import com.foli.listadetarefas.domain.usecase.preferences.ObserveUserPreferencesUseCase
+import com.foli.listadetarefas.domain.usecase.preferences.SetSelectedTabUseCase
+import com.foli.listadetarefas.domain.usecase.preferences.SetSortOrderUseCase
 import com.foli.listadetarefas.domain.usecase.task.DeleteTaskUseCase
 import com.foli.listadetarefas.domain.usecase.task.ObserveTasksUseCase
+import com.foli.listadetarefas.domain.usecase.task.SetTaskCompletedUseCase
+import com.foli.listadetarefas.testing.FakeLabelRepository
+import com.foli.listadetarefas.testing.FakePreferencesRepository
 import com.foli.listadetarefas.testing.FakeTaskRepository
+import com.foli.listadetarefas.testing.FakeTimeProvider
 import com.foli.listadetarefas.ui.UiText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -30,10 +41,21 @@ class TaskListDeleteTest {
         createdAt = 100L,
     )
 
-    private fun createViewModel(repository: FakeTaskRepository) = TaskListViewModel(
+    private fun createViewModel(
+        repository: FakeTaskRepository,
+        preferences: FakePreferencesRepository = FakePreferencesRepository(),
+    ) = TaskListViewModel(
         observeTasksUseCase = ObserveTasksUseCase(repository),
+        observeLabelsUseCase = ObserveLabelsUseCase(FakeLabelRepository()),
         deleteTaskUseCase = DeleteTaskUseCase(repository),
+        setTaskCompletedUseCase = SetTaskCompletedUseCase(repository, FakeTimeProvider()),
+        observeUserPreferencesUseCase = ObserveUserPreferencesUseCase(preferences),
+        setSelectedTabUseCase = SetSelectedTabUseCase(preferences),
+        setSortOrderUseCase = SetSortOrderUseCase(preferences),
+        timeProvider = FakeTimeProvider(),
+        timeSignals = TimeSignals(),
         analyticsTracker = NoOpAnalyticsTracker(),
+        savedStateHandle = SavedStateHandle(),
     )
 
     @After

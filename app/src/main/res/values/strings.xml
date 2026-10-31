@@ -38,10 +38,94 @@
     <string name="storage_delete_error_message">Não foi possível excluir. Tente novamente.</string>
     <string name="task_load_error">Não foi possível carregar a tarefa.</string>
 
+    <!-- Abas e conclusao (S1, US-03) -->
+    <string name="tab_active">Ativas</string>
+    <string name="tab_completed">Concluídas</string>
+    <string name="empty_completed_title">Nada concluído ainda</string>
+    <string name="empty_completed_body">As tarefas que você concluir aparecem aqui.</string>
+    <string name="completed_on">Concluída em %1$s</string>
+    <string name="completed_on_a11y">Concluída em %1$s</string>
+
     <!-- Acessibilidade (US-01) -->
     <string name="a11y_more_options">Mais opções da tarefa</string>
     <string name="a11y_loading_tasks">Carregando tarefas</string>
     <string name="a11y_edit_task">Editar tarefa</string>
     <string name="a11y_task">%1$s. %2$s</string>
     <string name="a11y_back">Voltar</string>
+
+    <!-- Acessibilidade (US-03) -->
+    <string name="a11y_checkbox_completed">Concluída</string>
+    <string name="a11y_checkbox_not_completed">Não concluída</string>
+    <string name="a11y_mark_completed">Marcar como concluída</string>
+    <string name="a11y_reopen">Reabrir tarefa</string>
+    <string name="a11y_switch_tab_active">Alternar para a aba Ativas</string>
+    <string name="a11y_switch_tab_completed">Alternar para a aba Concluídas</string>
+
+    <!-- Etiquetas (US-04) -->
+    <string name="labels_title">Etiquetas</string>
+    <string name="label_new">Criar etiqueta</string>
+    <string name="label_edit">Editar etiqueta</string>
+    <string name="label_name_label">Nome</string>
+    <string name="label_name_required">Informe um nome</string>
+    <string name="label_name_duplicate">Já existe uma etiqueta com esse nome</string>
+    <string name="label_color_section">Cor</string>
+    <string name="label_delete_title">Excluir etiqueta?</string>
+    <string name="label_delete_body">As tarefas que usam esta etiqueta ficarão sem etiqueta.</string>
+    <string name="empty_labels_title">Nenhuma etiqueta</string>
+    <string name="empty_labels_body">Crie etiquetas para organizar suas tarefas por contexto.</string>
+    <string name="selector_empty_labels">Você ainda não tem etiquetas.</string>
+    <string name="labels_load_error">Não foi possível carregar as etiquetas.</string>
+    <string name="a11y_loading_labels">Carregando etiquetas</string>
+    <string name="a11y_more_options_label">Mais opções da etiqueta</string>
+    <string name="a11y_label">Etiqueta %1$s</string>
+    <string name="a11y_label_color">%1$s, cor da etiqueta</string>
+    <string name="a11y_selected">Selecionado</string>
+    <string name="support_max_chars">Máximo de %1$d caracteres</string>
+
+    <!-- Etiqueta no formulário (US-04) -->
+    <string name="label_section">Etiqueta</string>
+    <string name="label_none">Sem etiqueta</string>
+    <string name="label_create_shortcut">Criar etiqueta</string>
+
+    <!-- Nomes das cores da paleta fixa (US-04) -->
+    <string name="color_name_red">Vermelho</string>
+    <string name="color_name_orange">Laranja</string>
+    <string name="color_name_mustard">Mostarda</string>
+    <string name="color_name_green">Verde</string>
+    <string name="color_name_teal">Verde-água</string>
+    <string name="color_name_blue">Azul</string>
+    <string name="color_name_purple">Roxo</string>
+    <string name="color_name_pink">Rosa</string>
+
+    <!-- Data limite e indicador de proximidade (US-05) -->
+    <string name="deadline_section">Data limite</string>
+    <string name="deadline_action_set">Definir data</string>
+    <string name="deadline_remove">Remover data limite</string>
+    <string name="deadline_overdue">Atrasada</string>
+    <string name="deadline_today">Hoje</string>
+    <string name="deadline_tomorrow">Amanhã</string>
+    <string name="deadline_soon">Até 7 dias</string>
+    <string name="deadline_a11y_today">Vence hoje</string>
+    <string name="deadline_a11y_tomorrow">Vence amanhã</string>
+    <string name="deadline_a11y_soon">Vence em até 7 dias</string>
+    <string name="deadline_a11y_overdue">Atrasada, venceu em %1$s</string>
+    <string name="ok">OK</string>
+
+    <!-- Busca (S1, US-06) -->
+    <string name="search_placeholder">Buscar por título ou descrição</string>
+    <string name="search_clear">Limpar busca</string>
+    <string name="empty_search_title">Nenhum resultado</string>
+    <string name="empty_search_echo">Sua busca: “%1$s”</string>
+    <string name="empty_search_body">Tente outra palavra ou limpe a busca.</string>
+
+    <!-- Ordenação (S1/S5, US-07) -->
+    <string name="sort_label">Ordenação: %1$s</string>
+    <string name="sort_sheet_title">Ordenar por</string>
+    <string name="sort_title_az">Título A-Z</string>
+    <string name="sort_title_za">Título Z-A</string>
+    <string name="sort_created_desc">Criação (mais recente)</string>
+    <string name="sort_created_asc">Criação (mais antiga)</string>
+    <string name="sort_deadline_asc">Prazo (mais próximo)</string>
+    <string name="sort_deadline_desc">Prazo (mais distante)</string>
+    <string name="a11y_sort_current">Ordenação atual: %1$s</string>
 </resources>

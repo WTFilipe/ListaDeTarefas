@@ -5,6 +5,8 @@ import androidx.room.Room
 import com.foli.listadetarefas.BuildConfig
 import com.foli.listadetarefas.core.di.IoDispatcher
 import com.foli.listadetarefas.data.local.db.AppDatabase
+import com.foli.listadetarefas.data.local.db.LabelDao
+import com.foli.listadetarefas.data.local.db.MIGRATION_1_2
 import com.foli.listadetarefas.data.local.db.TaskDao
 import dagger.Module
 import dagger.Provides
@@ -35,10 +37,14 @@ object DatabaseModule {
         return Room.databaseBuilder(context, AppDatabase::class.java, DATABASE_NAME)
             .setQueryExecutor(executor)
             .setTransactionExecutor(executor)
+            .addMigrations(MIGRATION_1_2)
             .apply { if (BuildConfig.DEBUG) fallbackToDestructiveMigration(dropAllTables = true) }
             .build()
     }
 
     @Provides
     fun provideTaskDao(database: AppDatabase): TaskDao = database.taskDao()
+
+    @Provides
+    fun provideLabelDao(database: AppDatabase): LabelDao = database.labelDao()
 }

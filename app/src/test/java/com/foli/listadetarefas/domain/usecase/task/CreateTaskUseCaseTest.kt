@@ -48,6 +48,41 @@ class CreateTaskUseCaseTest {
     }
 
     @Test
+    fun invoke_persistsOptionalDueDate() = runTest {
+        val dueDate = java.time.LocalDate.of(2026, 11, 12)
+
+        useCase(TaskDraft(id = "id-1", title = "Título", description = "", dueDate = dueDate))
+
+        assertEquals(dueDate, repository.tasks.value.single().dueDate)
+    }
+
+    @Test
+    fun update_persistsDueDateWithoutChangingCreatedAt() = runTest {
+        val original = com.foli.listadetarefas.domain.model.Task(
+            id = "id-1",
+            title = "Antiga",
+            description = "",
+            dueDate = java.time.LocalDate.of(2026, 11, 12),
+            createdAt = 42L,
+        )
+        repository.tasks.value = listOf(original)
+        val update = UpdateTaskUseCase(repository)
+
+        update(
+            TaskDraft(
+                id = "id-1",
+                title = "Nova",
+                description = "",
+                dueDate = java.time.LocalDate.of(2026, 12, 1),
+            ),
+        )
+
+        val saved = repository.tasks.value.single()
+        assertEquals(java.time.LocalDate.of(2026, 12, 1), saved.dueDate)
+        assertEquals(42L, saved.createdAt)
+    }
+
+    @Test
     fun invoke_repeatedDraft_doesNotDuplicateTheTask() = runTest {
         val draft = TaskDraft(id = "id-fixo", title = "Título", description = "")
 

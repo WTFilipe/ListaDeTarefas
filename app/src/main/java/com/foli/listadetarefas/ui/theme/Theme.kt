@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 
 /**
  * Tema do produto: Material 3 completo, sem dynamic color, seguindo o
@@ -117,10 +118,16 @@ fun ListaDeTarefasTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    MaterialTheme(
-        colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
-        typography = AppTypography,
-        shapes = AppShapes.material,
-        content = content,
-    )
+    val palette = if (darkTheme) DarkLabelPalette else LightLabelPalette
+    CompositionLocalProvider(LocalLabelPalette provides palette) {
+        MaterialTheme(
+            colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
+            typography = AppTypography,
+            shapes = AppShapes.material,
+            content = content,
+        )
+    }
 }
+
+private val LightLabelPalette = lightLabelPalette()
+private val DarkLabelPalette = darkLabelPalette()

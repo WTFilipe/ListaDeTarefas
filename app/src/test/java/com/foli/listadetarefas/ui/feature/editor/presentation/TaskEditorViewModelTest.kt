@@ -6,9 +6,12 @@ import com.foli.listadetarefas.R
 import com.foli.listadetarefas.core.analytics.NoOpAnalyticsTracker
 import com.foli.listadetarefas.domain.model.Task
 import com.foli.listadetarefas.domain.model.TaskLimits
+import com.foli.listadetarefas.domain.usecase.label.CreateLabelUseCase
+import com.foli.listadetarefas.domain.usecase.label.ObserveLabelsUseCase
 import com.foli.listadetarefas.domain.usecase.task.CreateTaskUseCase
 import com.foli.listadetarefas.domain.usecase.task.ObserveTaskUseCase
 import com.foli.listadetarefas.domain.usecase.task.UpdateTaskUseCase
+import com.foli.listadetarefas.testing.FakeLabelRepository
 import com.foli.listadetarefas.testing.FakeTaskRepository
 import com.foli.listadetarefas.testing.FakeTimeProvider
 import com.foli.listadetarefas.ui.UiText
@@ -34,6 +37,7 @@ class TaskEditorViewModelTest {
     private fun createViewModel(
         repository: FakeTaskRepository,
         taskId: String? = null,
+        labelRepository: FakeLabelRepository = FakeLabelRepository(),
     ): TaskEditorViewModel {
         val savedStateHandle = if (taskId == null) {
             SavedStateHandle()
@@ -45,6 +49,9 @@ class TaskEditorViewModelTest {
             createTaskUseCase = CreateTaskUseCase(repository, timeProvider),
             updateTaskUseCase = UpdateTaskUseCase(repository),
             observeTaskUseCase = ObserveTaskUseCase(repository),
+            observeLabelsUseCase = ObserveLabelsUseCase(labelRepository),
+            createLabelUseCase = CreateLabelUseCase(labelRepository, timeProvider),
+            timeProvider = timeProvider,
             analyticsTracker = NoOpAnalyticsTracker(),
         )
     }

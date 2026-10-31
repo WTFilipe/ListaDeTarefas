@@ -26,4 +26,16 @@ interface TaskDao {
 
     @Query("DELETE FROM task WHERE id = :id")
     suspend fun deleteById(id: String)
+
+    /** Conclusão/reabertura idempotente: altera apenas `completed_at` (US-03). */
+    @Query("UPDATE task SET completed_at = :completedAt WHERE id = :id")
+    suspend fun setCompleted(id: String, completedAt: Long?)
+
+    /** Associação/remoção de etiqueta: altera apenas `label_id` (US-04). */
+    @Query("UPDATE task SET label_id = :labelId WHERE id = :id")
+    suspend fun setLabel(id: String, labelId: String?)
+
+    /** Usado na exclusão de etiqueta para deixar as tarefas sem etiqueta. */
+    @Query("UPDATE task SET label_id = NULL WHERE label_id = :labelId")
+    suspend fun clearLabel(labelId: String)
 }
