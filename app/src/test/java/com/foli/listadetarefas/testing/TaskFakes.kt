@@ -7,6 +7,7 @@ import com.foli.listadetarefas.core.time.TimeProvider
 import com.foli.listadetarefas.domain.model.Task
 import com.foli.listadetarefas.domain.model.TaskLabel
 import com.foli.listadetarefas.domain.model.TaskTab
+import com.foli.listadetarefas.domain.model.SortOrder
 import com.foli.listadetarefas.domain.model.UserPreferences
 import com.foli.listadetarefas.domain.repository.LabelRepository
 import com.foli.listadetarefas.domain.repository.PreferencesRepository
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import java.io.IOException
 import java.time.LocalDate
 
 /**
@@ -156,12 +158,26 @@ class FakePreferencesRepository : PreferencesRepository {
 
     val preferences = MutableStateFlow(UserPreferences())
     var setSelectedTabCalls: Int = 0
+    var setSortOrderCalls: Int = 0
+
+    /** Simula demora de I/O na gravação para testar emissões intercaladas (M6). */
+    var setSortOrderDelayMillis: Long = 0L
+
+    /** Simula falha de I/O do DataStore na gravação da ordenação (M4). */
+    var failSetSortOrder: Boolean = false
 
     override fun observePreferences(): Flow<UserPreferences> = preferences
 
     override suspend fun setSelectedTab(tab: TaskTab) {
         setSelectedTabCalls++
         preferences.update { it.copy(selectedTab = tab) }
+    }
+
+    override suspend fun setSortOrder(order: SortOrder) {
+        setSortOrderCalls++
+        if (setSortOrderDelayMillis > 0L) delay(setSortOrderDelayMillis)
+        if (failSetSortOrder) throw IOException("falha de persistência simulada")
+        preferences.update { it.copy(sortOrder = order) }
     }
 }
 

@@ -24,8 +24,13 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -35,15 +40,18 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalResources
 import com.foli.listadetarefas.R
+import com.foli.listadetarefas.domain.model.SortOrder
 import com.foli.listadetarefas.domain.model.TaskTab
 import com.foli.listadetarefas.ui.UiText
 import com.foli.listadetarefas.ui.designsystem.components.ActionTopAppBar
 import com.foli.listadetarefas.ui.designsystem.components.EmptyState
 import com.foli.listadetarefas.ui.designsystem.components.ErrorBanner
 import com.foli.listadetarefas.ui.designsystem.components.SearchField
+import com.foli.listadetarefas.ui.designsystem.components.SortControl
 import com.foli.listadetarefas.ui.designsystem.components.TaskRow
 import com.foli.listadetarefas.ui.designsystem.icons.AppIcons
 import com.foli.listadetarefas.ui.feature.tasks.presentation.components.DeleteTaskDialog
+import com.foli.listadetarefas.ui.feature.tasks.presentation.components.TaskSortSheet
 import androidx.hilt.navigation.compose.hiltViewModel
 
 /**
@@ -87,6 +95,9 @@ fun TaskListRoute(
         onQueryChange = { value -> viewModel.onAction(TaskListAction.QueryChanged(value)) },
         onSearchClear = { viewModel.onAction(TaskListAction.SearchCleared) },
         onTabSelected = { tab -> viewModel.onAction(TaskListAction.TabSelected(tab)) },
+        onSortOrderSelected = { order ->
+            viewModel.onAction(TaskListAction.SortOrderSelected(order))
+        },
         onCompletionToggled = { taskId, isCompleted ->
             viewModel.onAction(TaskListAction.CompletionToggled(taskId, isCompleted))
         },
@@ -108,6 +119,7 @@ private fun TaskListScreen(
     onQueryChange: (String) -> Unit,
     onSearchClear: () -> Unit,
     onTabSelected: (TaskTab) -> Unit,
+    onSortOrderSelected: (SortOrder) -> Unit,
     onCompletionToggled: (String, Boolean) -> Unit,
     onNewTask: () -> Unit,
     onLabelsClick: () -> Unit,
@@ -120,6 +132,15 @@ private fun TaskListScreen(
 ) {
     val trimmedQuery = state.query.trim()
     val hasQuery = trimmedQuery.isNotEmpty()
+    // A visibilidade do S5 é estado local de UI salvo na configuração
+    // (ARCHITECTURE §6).
+    var isSortSheetVisible by rememberSaveable { mutableStateOf(false) }
+    // Não é `rememberSaveable`: depois de uma troca de configuração o S5 já está
+    // fechado e não deve roubar o foco de quem acabou de chegar na tela.
+    var restoreSortFocus by remember { mutableStateOf(false) }
+    val sortFocusRequester = remember { FocusRequester() }
+    val sortOptionName = stringResource(state.sortOrder.labelRes())
+    val sortLabel = stringResource(R.string.sort_label, sortOptionName)
     // O FAB só é ocultado no empty real da lista ativa, que tem CTA própria
     // (DESIGN_SPEC §2.2/§9.2). O empty de busca mantém o FAB.
     val isPlainActiveEmpty = state.rows.isEmpty() &&
@@ -163,8 +184,8 @@ private fun TaskListScreen(
                 .fillMaxSize()
                 .padding(innerPadding),
         ) {
-            // Chrome de S1: app bar, busca e abas permanecem em todos os estados
-            // (DESIGN_SPEC §2.2/§8.2). Só o corpo central troca.
+            // Chrome de S1: app bar, busca, abas e ordenação permanecem em todos
+            // os estados (DESIGN_SPEC §2.2/§8.2). Só o corpo central troca.
             SearchField(
                 query = state.query,
                 onQueryChange = onQueryChange,
@@ -175,6 +196,17 @@ private fun TaskListScreen(
             TaskTabs(
                 selectedTab = state.tab,
                 onTabSelected = onTabSelected,
+            )
+
+            // SortRow do chrome de S1: sempre visível em todos os estados
+            // (DESIGN_SPEC §2.2), com o nome da ordenação vigente (US-07 AC 9).
+            SortControl(
+                label = sortLabel,
+                currentOption = sortOptionName,
+                onClick = { isSortSheetVisible = true },
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .focusRequester(sortFocusRequester),
             )
 
             if (state.loadFailed) {
@@ -249,6 +281,30 @@ private fun TaskListScreen(
             onConfirm = onDeleteConfirm,
             onDismiss = onDeleteDismiss,
         )
+    }
+
+    if (isSortSheetVisible) {
+        TaskSortSheet(
+            selected = state.sortOrder,
+            onSelect = { order ->
+                onSortOrderSelected(order)
+                isSortSheetVisible = false
+                restoreSortFocus = true
+            },
+            onDismiss = {
+                isSortSheetVisible = false
+                restoreSortFocus = true
+            },
+        )
+    }
+
+    // DESIGN_SPEC §9.5 (N6): ao fechar o S5 — escolhendo, no scrim, no drag
+    // handle ou pelo voltar do sistema — o foco volta ao controle de ordenação.
+    LaunchedEffect(restoreSortFocus, isSortSheetVisible) {
+        if (restoreSortFocus && !isSortSheetVisible) {
+            restoreSortFocus = false
+            sortFocusRequester.requestFocus()
+        }
     }
 }
 

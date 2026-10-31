@@ -117,4 +117,15 @@
     <string name="empty_search_title">Nenhum resultado</string>
     <string name="empty_search_echo">Sua busca: “%1$s”</string>
     <string name="empty_search_body">Tente outra palavra ou limpe a busca.</string>
+
+    <!-- Ordenação (S1/S5, US-07) -->
+    <string name="sort_label">Ordenação: %1$s</string>
+    <string name="sort_sheet_title">Ordenar por</string>
+    <string name="sort_title_az">Título A-Z</string>
+    <string name="sort_title_za">Título Z-A</string>
+    <string name="sort_created_desc">Criação (mais recente)</string>
+    <string name="sort_created_asc">Criação (mais antiga)</string>
+    <string name="sort_deadline_asc">Prazo (mais próximo)</string>
+    <string name="sort_deadline_desc">Prazo (mais distante)</string>
+    <string name="a11y_sort_current">Ordenação atual: %1$s</string>
 </resources>
