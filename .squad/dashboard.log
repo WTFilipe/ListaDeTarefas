@@ -26,3 +26,88 @@ Traceback (most recent call last):
     self._sock.shutdown(socket.SHUT_RDWR)
     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
 ConnectionResetError: [WinError 10054] Foi forçado o cancelamento de uma conexão existente pelo host remoto
+2026-10-30 11:56:18.370 Uvicorn server started on 127.0.0.1:8501
+
+  You can now view your Streamlit app in your browser.
+
+  URL: http://127.0.0.1:8501
+
+  Help agents write better Streamlit apps?
+  Install the official Streamlit skills by running streamlit skills in your terminal.
+
+2026-10-30 12:53:21.274 Uncaught app execution
+Traceback (most recent call last):
+  File "C:\Users\Pichau\AppData\Local\Programs\Python\Python315\Lib\site-packages\streamlit\runtime\scriptrunner\exec_code.py", line 136, in exec_func_with_error_handling
+    result = func()
+  File "C:\Users\Pichau\AppData\Local\Programs\Python\Python315\Lib\site-packages\streamlit\runtime\scriptrunner\script_runner.py", line 924, in code_to_exec
+    exec(code, module.__dict__)  # noqa: S102
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pichau\.config\opencode\skills\squad-autonoma\scripts\dashboard.py", line 28, in <module>
+    from squad_state import ARTIFACTS, migrate_project, read_config, read_state, write_config
+ImportError: cannot import name 'migrate_project' from 'squad_state' (C:\Users\Pichau\.config\opencode\skills\squad-autonoma\scripts\squad_state.py). Did you mean: 'init_project'?
+2026-10-30 12:56:01.810 Uncaught app execution
+Traceback (most recent call last):
+  File "C:\Users\Pichau\AppData\Local\Programs\Python\Python315\Lib\site-packages\streamlit\runtime\scriptrunner\exec_code.py", line 136, in exec_func_with_error_handling
+    result = func()
+  File "C:\Users\Pichau\AppData\Local\Programs\Python\Python315\Lib\site-packages\streamlit\runtime\scriptrunner\script_runner.py", line 924, in code_to_exec
+    exec(code, module.__dict__)  # noqa: S102
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pichau\.config\opencode\skills\squad-autonoma\scripts\dashboard.py", line 28, in <module>
+    from squad_state import ARTIFACTS, migrate_project, read_config, read_state, write_config
+ImportError: cannot import name 'migrate_project' from 'squad_state' (C:\Users\Pichau\.config\opencode\skills\squad-autonoma\scripts\squad_state.py). Did you mean: 'init_project'?
+2026-10-30 12:56:45.065 Uncaught app execution
+Traceback (most recent call last):
+  File "C:\Users\Pichau\AppData\Local\Programs\Python\Python315\Lib\site-packages\streamlit\runtime\scriptrunner\exec_code.py", line 136, in exec_func_with_error_handling
+    result = func()
+  File "C:\Users\Pichau\AppData\Local\Programs\Python\Python315\Lib\site-packages\streamlit\runtime\scriptrunner\script_runner.py", line 924, in code_to_exec
+    exec(code, module.__dict__)  # noqa: S102
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pichau\.config\opencode\skills\squad-autonoma\scripts\dashboard.py", line 28, in <module>
+    from squad_state import ARTIFACTS, migrate_project, read_config, read_state, write_config
+ImportError: cannot import name 'migrate_project' from 'squad_state' (C:\Users\Pichau\.config\opencode\skills\squad-autonoma\scripts\squad_state.py). Did you mean: 'init_project'?
+2026-10-30 13:16:12.872 Uvicorn server started on 127.0.0.1:8501
+
+  You can now view your Streamlit app in your browser.
+
+  URL: http://127.0.0.1:8501
+
+  Help agents write better Streamlit apps?
+  Install the official Streamlit skills by running streamlit skills in your terminal.
+
+2026-10-30 17:48:00.501 Uvicorn server started on 127.0.0.1:8501
+
+  You can now view your Streamlit app in your browser.
+
+  URL: http://127.0.0.1:8501
+
+  Help agents write better Streamlit apps?
+  Install the official Streamlit skills by running streamlit skills in your terminal.
+
+2026-10-30 18:45:07.557 Uvicorn server started on 127.0.0.1:8502
+
+  You can now view your Streamlit app in your browser.
+
+  URL: http://127.0.0.1:8502
+
+  Help agents write better Streamlit apps?
+  Install the official Streamlit skills by running streamlit skills in your terminal.
+
+Exception in callback _ProactorBasePipeTransport._call_connection_lost()
+handle: <Handle _ProactorBasePipeTransport._call_connection_lost()>
+Traceback (most recent call last):
+  File "C:\Users\Pichau\AppData\Local\Programs\Python\Python315\Lib\asyncio\events.py", line 94, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Pichau\AppData\Local\Programs\Python\Python315\Lib\asyncio\proactor_events.py", line 167, in _call_connection_lost
+    self._sock.shutdown(socket.SHUT_RDWR)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] Foi forçado o cancelamento de uma conexão existente pelo host remoto
+2026-10-31 00:49:33.526 Uvicorn server started on 127.0.0.1:8501
+
+  You can now view your Streamlit app in your browser.
+
+  URL: http://127.0.0.1:8501
+
+  Help agents write better Streamlit apps?
+  Install the official Streamlit skills by running streamlit skills in your terminal.
+

@@ -21,7 +21,7 @@
         "No primeiro uso com lista ativa vazia, exibe estado vazio com texto explicativo e ação 'Nova tarefa'",
         "Em falha de armazenamento, exibe mensagem não técnica com ação 'Tentar novamente' e preserva o conteúdo digitado no formulário"
       ],
-      "status": "plan_review",
+      "status": "done",
       "tasks": [
         {
           "id": "T01",
@@ -64,7 +64,7 @@
             "Strings base do app em res/values/strings.xml (nenhuma string visível hardcoded em composables)"
           ],
           "depends_on": [],
-          "status": "pending",
+          "status": "released",
           "iterations": 0,
           "implementation_path": ".squad/stories/US-01/tasks/T01/IMPLEMENTATION.md",
           "review_path": ".squad/stories/US-01/tasks/T01/CHAOS_REVIEW.md",
@@ -105,7 +105,7 @@
           "depends_on": [
             "T01"
           ],
-          "status": "pending",
+          "status": "released",
           "iterations": 0,
           "implementation_path": ".squad/stories/US-01/tasks/T02/IMPLEMENTATION.md",
           "review_path": ".squad/stories/US-01/tasks/T02/CHAOS_REVIEW.md",
@@ -138,7 +138,7 @@
           "depends_on": [
             "T02"
           ],
-          "status": "pending",
+          "status": "released",
           "iterations": 0,
           "implementation_path": ".squad/stories/US-01/tasks/T03/IMPLEMENTATION.md",
           "review_path": ".squad/stories/US-01/tasks/T03/CHAOS_REVIEW.md",
@@ -182,7 +182,7 @@
           "depends_on": [
             "T03"
           ],
-          "status": "pending",
+          "status": "released",
           "iterations": 0,
           "implementation_path": ".squad/stories/US-01/tasks/T04/IMPLEMENTATION.md",
           "review_path": ".squad/stories/US-01/tasks/T04/CHAOS_REVIEW.md",
@@ -217,7 +217,7 @@
           "depends_on": [
             "T04"
           ],
-          "status": "pending",
+          "status": "released",
           "iterations": 0,
           "implementation_path": ".squad/stories/US-01/tasks/T05/IMPLEMENTATION.md",
           "review_path": ".squad/stories/US-01/tasks/T05/CHAOS_REVIEW.md",
@@ -253,7 +253,7 @@
             "T04",
             "T05"
           ],
-          "status": "pending",
+          "status": "released",
           "iterations": 0,
           "implementation_path": ".squad/stories/US-01/tasks/T06/IMPLEMENTATION.md",
           "review_path": ".squad/stories/US-01/tasks/T06/CHAOS_REVIEW.md",
@@ -265,7 +265,10 @@
       "plan_json": ".squad/stories/US-01/TASK_PLAN.json",
       "review_path": ".squad/stories/US-01/PLAN_REVIEW.md",
       "story_mr": ".squad/stories/US-01/MR.md",
-      "current_task": "T01"
+      "current_task": "T01",
+      "dev_mode": "story_batch",
+      "code_review_path": ".squad/stories/US-01/CODE_REVIEW.md",
+      "brief_path": ".squad/stories/US-01/DEV_BRIEF.md"
     },
     {
       "id": "US-02",
@@ -280,14 +283,87 @@
         "Colar texto acima do limite não quebra o layout e o contador reflete o valor aceito",
         "Textos no limite continuam legíveis sem alterar a altura da linha: título e descrição com até 2 linhas cada e reticências, com texto completo no formulário e no TalkBack"
       ],
-      "status": "pending",
-      "tasks": [],
+      "status": "done",
+      "tasks": [
+        {
+          "id": "T01",
+          "title": "Regras de limite no domínio",
+          "description": "Ativar TaskLimits, rejeitar título/descrição acima de 120/2000 com AppFailure.TextTooLong e expor truncamento puro; cobrir fronteiras com testes.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/domain/model/TaskLimits.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/logic/TaskValidator.kt",
+            "app/src/test/java/com/foli/listadetarefas/domain/logic/TaskValidatorTest.kt"
+          ],
+          "acceptance_criteria": [
+            "Texto no limite é aceito e um caractere acima é rejeitado com AppFailure.TextTooLong",
+            "Título vazio/só espaços continua rejeitado com AppFailure.EmptyTitle e descrição só com espaços vira vazia",
+            "Funções puras de truncamento respeitam 120/2000 e são cobertas por testes"
+          ],
+          "depends_on": [],
+          "status": "released",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-02/tasks/T01/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-02/tasks/T01/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-02/tasks/T01/MR.md"
+        },
+        {
+          "id": "T02",
+          "title": "Aplicação dos limites no ViewModel S2",
+          "description": "Truncar TitleChanged/DescriptionChanged e conteúdo carregado na edição usando as regras de domínio.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/editor/presentation/TaskEditorViewModel.kt",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/editor/presentation/TaskEditorViewModelTest.kt"
+          ],
+          "acceptance_criteria": [
+            "Digitação acima do limite é bloqueada e o estado guarda exatamente os caracteres aceitos",
+            "Colar texto maior trunca para o limite sem alterar o restante do estado",
+            "Criação e edição usam o mesmo caminho e conteúdo legado é normalizado ao carregar",
+            "Digitar continua sem gravar nada"
+          ],
+          "depends_on": [
+            "T01"
+          ],
+          "status": "released",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-02/tasks/T02/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-02/tasks/T02/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-02/tasks/T02/MR.md"
+        },
+        {
+          "id": "T03",
+          "title": "Contador e limite atingido no formulário",
+          "description": "Adicionar supportingText em duas partes com contador atual/máximo, estado Limite atingido e strings; ajustar gate de strings.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/editor/presentation/components/TaskFormFields.kt",
+            "app/src/main/res/values/strings.xml",
+            "app/src/test/java/com/foli/listadetarefas/architecture/ArchitectureRulesTest.kt"
+          ],
+          "acceptance_criteria": [
+            "Título e descrição exibem contador atual/120 e atual/2000 sempre visível à direita",
+            "Contador permanece onSurfaceVariant e erro de validação tem precedência",
+            "Ao atingir o máximo o apoio exibe Limite atingido",
+            "Strings novas em recursos, sem texto hardcoded, e gate de arquitetura verde",
+            "Linha da lista continua com 2 linhas, reticências e TalkBack integral (AC 6)"
+          ],
+          "depends_on": [
+            "T02"
+          ],
+          "status": "released",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-02/tasks/T03/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-02/tasks/T03/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-02/tasks/T03/MR.md"
+        }
+      ],
       "plan_iterations": 0,
       "plan_path": ".squad/stories/US-02/TASK_PLAN.md",
       "plan_json": ".squad/stories/US-02/TASK_PLAN.json",
       "review_path": ".squad/stories/US-02/PLAN_REVIEW.md",
       "story_mr": ".squad/stories/US-02/MR.md",
-      "current_task": null
+      "current_task": "T01",
+      "dev_mode": "story_batch",
+      "code_review_path": ".squad/stories/US-02/CODE_REVIEW.md",
+      "brief_path": ".squad/stories/US-02/DEV_BRIEF.md"
     },
     {
       "id": "US-03",
@@ -304,14 +380,145 @@
         "Aba 'Concluídas' vazia exibe estado vazio textual sem ações quebradas",
         "Excluir tarefa concluída segue o mesmo fluxo de confirmação e de falha de armazenamento da US-01"
       ],
-      "status": "pending",
-      "tasks": [],
+      "status": "done",
+      "tasks": [
+        {
+          "id": "T01",
+          "title": "Domínio e persistência da conclusão de tarefas",
+          "description": "TaskTab, filtro por aba, setCompleted idempotente no DAO/repositório, SetTaskCompletedUseCase com TimeProvider e formatação dd/MM/aaaa.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/domain/model/TaskTab.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/logic/TaskFilter.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/repository/TaskRepository.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/usecase/task/SetTaskCompletedUseCase.kt",
+            "app/src/main/java/com/foli/listadetarefas/core/format/DateLabelFormatter.kt",
+            "app/src/main/java/com/foli/listadetarefas/data/local/db/TaskDao.kt",
+            "app/src/main/java/com/foli/listadetarefas/data/repository/TaskRepositoryImpl.kt",
+            "app/src/test/java/com/foli/listadetarefas/domain/logic/TaskFilterTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/domain/usecase/task/SetTaskCompletedUseCaseTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/core/format/DateLabelFormatterTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/data/local/db/TaskDaoTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/data/repository/TaskRepositoryImplTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/testing/TaskFakes.kt"
+          ],
+          "acceptance_criteria": [
+            "Marcar registra completed_at via TimeProvider sem apagar ou alterar título, descrição, etiqueta, prazo e created_at",
+            "Reabrir limpa completed_at preservando todos os demais dados",
+            "TaskFilter separa corretamente tarefas ativas e concluídas",
+            "Data de conclusão é formatada como dd/MM/aaaa na data local, sem hora",
+            "Falha de armazenamento é convertida em AppFailure.StorageUnavailable"
+          ],
+          "depends_on": [],
+          "status": "released",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-03/tasks/T01/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-03/tasks/T01/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-03/tasks/T01/MR.md"
+        },
+        {
+          "id": "T02",
+          "title": "Preferências locais com DataStore",
+          "description": "UserPreferences, contrato/use cases de preferências, fonte DataStore, mapper tolerante e módulos Hilt.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/domain/model/UserPreferences.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/repository/PreferencesRepository.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/usecase/preferences/ObserveUserPreferencesUseCase.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/usecase/preferences/SetSelectedTabUseCase.kt",
+            "app/src/main/java/com/foli/listadetarefas/data/local/preferences/UserPreferencesDataSource.kt",
+            "app/src/main/java/com/foli/listadetarefas/data/mapper/PreferencesMapper.kt",
+            "app/src/main/java/com/foli/listadetarefas/data/repository/PreferencesRepositoryImpl.kt",
+            "app/src/main/java/com/foli/listadetarefas/di/DataStoreModule.kt",
+            "app/src/main/java/com/foli/listadetarefas/di/RepositoryModule.kt",
+            "app/build.gradle.kts",
+            "gradle/libs.versions.toml",
+            "app/src/test/java/com/foli/listadetarefas/data/mapper/PreferencesMapperTest.kt"
+          ],
+          "acceptance_criteria": [
+            "Aba selecionada é observada como Flow e persistida em DataStore",
+            "Valor ausente ou desconhecido cai no default ACTIVE sem exceção",
+            "Escrita ocorre fora da main thread via IoDispatcher",
+            "Preferências ficam disponíveis por injeção Hilt"
+          ],
+          "depends_on": [
+            "T01"
+          ],
+          "status": "released",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-03/tasks/T02/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-03/tasks/T02/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-03/tasks/T02/MR.md"
+        },
+        {
+          "id": "T03",
+          "title": "MVI da lista com aba, conclusão e retry",
+          "description": "Estado com aba, ações TabSelected/CompletionToggled, retry ToggleCompletion, combinação tasks+preferences e mapper de conclusão.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/domain/usecase/task/ObserveTasksUseCase.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/model/TaskUiModel.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListState.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListAction.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskRetryOperation.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListViewModel.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskUiMapper.kt",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListViewModelTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListDeleteTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListCompletionTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskUiMapperTest.kt"
+          ],
+          "acceptance_criteria": [
+            "Linhas refletem o Room na ordenação vigente e são filtradas pela aba atual",
+            "TabSelected atualiza o estado imediatamente e persiste; a aba é restaurada ao recriar o ViewModel",
+            "CompletionToggled move a tarefa entre abas preservando dados e created_at",
+            "Falha de conclusão emite ShowStorageError com TaskRetryOperation.ToggleCompletion e o retry repete a operação",
+            "Loading só aparece após 200 ms e a leitura mantém o comportamento de erro + retry"
+          ],
+          "depends_on": [
+            "T01",
+            "T02"
+          ],
+          "status": "released",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-03/tasks/T03/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-03/tasks/T03/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-03/tasks/T03/MR.md"
+        },
+        {
+          "id": "T04",
+          "title": "UI das abas, checkbox e tarefa concluída",
+          "description": "TabRow Ativas/Concluídas, checkbox acessível de 48dp, título riscado, marca Concluída em, empty de Concluídas e strings da US-03.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/ui/designsystem/components/TaskRow.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListScreen.kt",
+            "app/src/main/res/values/strings.xml",
+            "app/src/test/java/com/foli/listadetarefas/architecture/ArchitectureRulesTest.kt",
+            "app/src/androidTest/java/com/foli/listadetarefas/accessibility/TaskRowSemanticsTest.kt"
+          ],
+          "acceptance_criteria": [
+            "Cada tarefa ativa exibe checkbox com alvo de toque >= 48dp",
+            "A aba Concluídas mostra título riscado e a marca Concluída em dd/MM/aaaa",
+            "As abas Ativas/Concluídas existem com Ativas padrão e a selecionada persiste",
+            "Aba Concluídas vazia exibe estado vazio textual sem ação quebrada",
+            "TalkBack recebe o texto integral mais a informação de conclusão; strings sem hardcode"
+          ],
+          "depends_on": [
+            "T03"
+          ],
+          "status": "released",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-03/tasks/T04/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-03/tasks/T04/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-03/tasks/T04/MR.md"
+        }
+      ],
       "plan_iterations": 0,
       "plan_path": ".squad/stories/US-03/TASK_PLAN.md",
       "plan_json": ".squad/stories/US-03/TASK_PLAN.json",
       "review_path": ".squad/stories/US-03/PLAN_REVIEW.md",
       "story_mr": ".squad/stories/US-03/MR.md",
-      "current_task": null
+      "current_task": "T01",
+      "dev_mode": "story_batch",
+      "code_review_path": ".squad/stories/US-03/CODE_REVIEW.md",
+      "brief_path": ".squad/stories/US-03/DEV_BRIEF.md"
     },
     {
       "id": "US-04",
@@ -333,14 +540,168 @@
         "Nome longo no chip é truncado com reticências sem empurrar os demais elementos da linha",
         "Criação, edição e exclusão de etiquetas refletem imediatamente e persistem após reabrir"
       ],
-      "status": "pending",
-      "tasks": [],
+      "status": "done",
+      "tasks": [
+        {
+          "id": "T01",
+          "title": "Domínio e persistência de etiquetas",
+          "description": "Criar paleta fixa (LabelColorKey), normalização de nome, TaskLabel, LabelValidator, contrato/use cases, tabela label v2 com índice único de name_key, mapeamento, repositório transacional que limpa label_id das tarefas, SetTaskLabelUseCase e wiring Hilt.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/core/palette/LabelColorKey.kt",
+            "app/src/main/java/com/foli/listadetarefas/core/text/TextNormalizer.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/model/TaskLabel.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/logic/LabelValidator.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/repository/LabelRepository.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/usecase/label",
+            "app/src/main/java/com/foli/listadetarefas/domain/usecase/task/SetTaskLabelUseCase.kt",
+            "app/src/main/java/com/foli/listadetarefas/data/local/db/LabelEntity.kt",
+            "app/src/main/java/com/foli/listadetarefas/data/local/db/LabelDao.kt",
+            "app/src/main/java/com/foli/listadetarefas/data/local/db/AppDatabase.kt",
+            "app/src/main/java/com/foli/listadetarefas/data/mapper/LabelMapper.kt",
+            "app/src/main/java/com/foli/listadetarefas/data/repository/LabelRepositoryImpl.kt",
+            "app/src/main/java/com/foli/listadetarefas/di/DatabaseModule.kt",
+            "app/src/main/java/com/foli/listadetarefas/di/RepositoryModule.kt",
+            "app/src/test/java/com/foli/listadetarefas"
+          ],
+          "acceptance_criteria": [
+            "Paleta fixa com exatamente 8 chaves e Vermelho como primeira",
+            "Nome obrigatório, com trim e até 30 caracteres; vazio/só espaços gera EmptyLabelName e excesso TextTooLong",
+            "Unicidade ignora caixa e acentos e duplicata gera DuplicateLabelName",
+            "Excluir etiqueta remove apenas a etiqueta e deixa tarefas com label_id nulo sem perder outros dados",
+            "Leituras reativas e escritas idempotentes por id; falhas de armazenamento viram StorageUnavailable"
+          ],
+          "depends_on": [],
+          "status": "released",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-04/tasks/T01/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-04/tasks/T01/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-04/tasks/T01/MR.md"
+        },
+        {
+          "id": "T02",
+          "title": "MVI da S3/S4",
+          "description": "Implementar estado/ações/efeitos, retry, mapper e ViewModel do gerenciamento de etiquetas com criação, edição, exclusão confirmada, duplicata inline, loading e falha de leitura.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/ui/model/LabelUiModel.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/model/LabelEditorUiModel.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/labels/presentation",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/labels"
+          ],
+          "acceptance_criteria": [
+            "Lista observa Room e reflete criação/edição/exclusão imediatamente",
+            "Criar abre S4 com nome vazio e cor Vermelho pré-selecionada",
+            "Editar carrega nome/cor atuais e aplica as mesmas validações",
+            "Duplicata mantém o sheet aberto com erro inline e nome preservado",
+            "Exclusão exige confirmação e estado pendingDelete",
+            "Falhas de armazenamento emitem retry com a operação exata e loading só acima de 200 ms"
+          ],
+          "depends_on": [
+            "T01"
+          ],
+          "status": "released",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-04/tasks/T02/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-04/tasks/T02/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-04/tasks/T02/MR.md"
+        },
+        {
+          "id": "T03",
+          "title": "UI de Etiquetas (S3 e S4)",
+          "description": "Entregar tela de etiquetas com lista, menu, empty state, FAB, dialog de exclusão e sheet S4 reutilizável com campo de nome/contador e grade de cores, além de navegação e strings.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/labels/presentation",
+            "app/src/main/java/com/foli/listadetarefas/ui/designsystem/components/LabelEditorSheet.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/designsystem/components/LabelColorGrid.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/theme/LabelPalette.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/navigation",
+            "app/src/main/res/values/strings.xml",
+            "app/src/test/java/com/foli/listadetarefas/architecture/ArchitectureRulesTest.kt",
+            "app/src/androidTest/java/com/foli/listadetarefas/accessibility"
+          ],
+          "acceptance_criteria": [
+            "S3 lista nome e amostra de cor; toque na linha e menu abrem edição/exclusão",
+            "Sem etiquetas exibe estado vazio com ação Criar etiqueta e sem FAB duplicado",
+            "S4 tem limite 30 com contador, erro inline de vazio/duplicata, grade fixa de 8 cores em 4 colunas com alvo 48dp e Vermelho pré-selecionado",
+            "Excluir mostra dialog com título/corpo e só remove após confirmação",
+            "Todas as strings em recursos e navegação type-safe para Labels"
+          ],
+          "depends_on": [
+            "T02"
+          ],
+          "status": "released",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-04/tasks/T03/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-04/tasks/T03/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-04/tasks/T03/MR.md"
+        },
+        {
+          "id": "T04",
+          "title": "Chip e ação Etiquetas na lista de tarefas",
+          "description": "Adicionar label ao TaskUiModel, observar etiquetas no TaskListViewModel, ação Etiquetas na top app bar e chip acessível na linha, sem espaço quando não há etiqueta.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/ui/model/TaskUiModel.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation",
+            "app/src/main/java/com/foli/listadetarefas/ui/designsystem/components/LabelChip.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/designsystem/components/TaskRow.kt",
+            "app/src/main/res/values/strings.xml",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/tasks"
+          ],
+          "acceptance_criteria": [
+            "Ação Etiquetas abre a tela de etiquetas",
+            "Linha exibe chip com cor e nome quando a tarefa tem etiqueta",
+            "Tarefa sem etiqueta não exibe chip nem espaço reservado",
+            "Nome longo é truncado com reticências sem empurrar o menu/trailing",
+            "TalkBack anuncia o nome completo da etiqueta e a cor nunca é o único sinal",
+            "Criar/editar/excluir etiqueta reflete imediatamente na lista"
+          ],
+          "depends_on": [
+            "T01",
+            "T03"
+          ],
+          "status": "released",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-04/tasks/T04/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-04/tasks/T04/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-04/tasks/T04/MR.md"
+        },
+        {
+          "id": "T05",
+          "title": "Etiqueta no formulário de tarefa (S2 + S7)",
+          "description": "Carregar etiquetas no editor, linha somente leitura, sheet S7 com Sem etiqueta e atalho Criar etiqueta, criação pelo atalho preservando o formulário e salvar a etiqueta escolhida.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/editor/presentation",
+            "app/src/main/java/com/foli/listadetarefas/ui/designsystem/components/LabelSelectorRow.kt",
+            "app/src/main/res/values/strings.xml",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/editor"
+          ],
+          "acceptance_criteria": [
+            "S2 mostra linha Etiqueta com etiqueta atual ou Sem etiqueta",
+            "S7 lista Sem etiqueta primeiro e todas as etiquetas; escolher aplica e fecha",
+            "Sem etiquetas, S7 mostra Sem etiqueta e texto explicativo com Criar etiqueta",
+            "Atalho abre S4 sem perder título/descrição e a etiqueta criada fica selecionada",
+            "Editar tarefa existente permite trocar/remover etiqueta e persiste",
+            "Salvar grava labelId na criação e na edição sem apagar outros dados"
+          ],
+          "depends_on": [
+            "T01",
+            "T04"
+          ],
+          "status": "released",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-04/tasks/T05/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-04/tasks/T05/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-04/tasks/T05/MR.md"
+        }
+      ],
       "plan_iterations": 0,
       "plan_path": ".squad/stories/US-04/TASK_PLAN.md",
       "plan_json": ".squad/stories/US-04/TASK_PLAN.json",
       "review_path": ".squad/stories/US-04/PLAN_REVIEW.md",
       "story_mr": ".squad/stories/US-04/MR.md",
-      "current_task": null
+      "current_task": "T01",
+      "dev_mode": "story_batch",
+      "code_review_path": ".squad/stories/US-04/CODE_REVIEW.md",
+      "brief_path": ".squad/stories/US-04/DEV_BRIEF.md"
     },
     {
       "id": "US-05",
@@ -357,14 +718,126 @@
         "Data no passado é permitida e exibida como 'Atrasada'",
         "A data limite persiste após reabrir o app"
       ],
-      "status": "pending",
-      "tasks": [],
+      "status": "done",
+      "tasks": [
+        {
+          "id": "T01",
+          "title": "Domínio do prazo e formatação de data",
+          "description": "DeadlineState + DeadlineClassifier puro por data local, formatação dd/MM/aaaa para LocalDate e persistência do dueDate na edição.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/domain/model/DeadlineState.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/logic/DeadlineClassifier.kt",
+            "app/src/main/java/com/foli/listadetarefas/core/format/DateLabelFormatter.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/usecase/task/UpdateTaskUseCase.kt",
+            "app/src/test/java/com/foli/listadetarefas/domain/logic/DeadlineClassifierTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/core/format/DateLabelFormatterTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/domain/usecase/task/CreateTaskUseCaseTest.kt"
+          ],
+          "acceptance_criteria": [
+            "Classificação retorna exatamente OVERDUE/TODAY/TOMORROW/SOON/null para dias <0, 0, 1, 2..7 e >7",
+            "Fronteiras de fim de mês, ano bissexto e ausência de data são cobertas por testes",
+            "Data é formatada como dd/MM/aaaa e UpdateTaskUseCase persiste dueDate sem alterar createdAt"
+          ],
+          "depends_on": [],
+          "status": "released",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-05/tasks/T01/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-05/tasks/T01/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-05/tasks/T01/MR.md"
+        },
+        {
+          "id": "T02",
+          "title": "Recálculo sem timer e projeção do prazo na lista",
+          "description": "TimeSignals + broadcast/resume, TimeProvider no TaskListViewModel, DeadlineUiState no TaskUiModel e mapper do prazo.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/core/time/TimeSignals.kt",
+            "app/src/main/java/com/foli/listadetarefas/MainActivity.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/model/DeadlineUiState.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/model/TaskUiModel.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskUiMapper.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListViewModel.kt",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskUiMapperTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListDeadlineTest.kt"
+          ],
+          "acceptance_criteria": [
+            "Indicador é recalculado ao abrir, no resume e em sinais de data/hora/fuso, sem timer de meia-noite",
+            "Toda ação da lista reavalia TimeProvider.today() antes de reduzir",
+            "Tarefa concluída ou sem data não recebe deadline no TaskUiModel"
+          ],
+          "depends_on": [
+            "T01"
+          ],
+          "status": "released",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-05/tasks/T02/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-05/tasks/T02/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-05/tasks/T02/MR.md"
+        },
+        {
+          "id": "T03",
+          "title": "Data limite no formulário S2",
+          "description": "Estado/ações dueDate, chip de data com definir/remover, date picker pt-BR sem hora e persistência na criação/edição.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/editor/presentation/TaskEditorState.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/editor/presentation/TaskEditorAction.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/editor/presentation/TaskEditorViewModel.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/editor/presentation/TaskEditorScreen.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/editor/presentation/TaskEditorRoute.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/editor/presentation/components/TaskDeadlineChip.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/editor/presentation/components/DeadlineDatePickerDialog.kt",
+            "app/src/main/res/values/strings.xml",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/editor/presentation/TaskEditorDeadlineTest.kt"
+          ],
+          "acceptance_criteria": [
+            "Criação e edição permitem escolher, ver (dd/MM/aaaa) e remover a data limite",
+            "Data é opcional, datas passadas são aceitas e o dueDate persiste pela criação/edição",
+            "Formulário preserva conteúdo e usa strings de recursos"
+          ],
+          "depends_on": [
+            "T01"
+          ],
+          "status": "released",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-05/tasks/T03/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-05/tasks/T03/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-05/tasks/T03/MR.md"
+        },
+        {
+          "id": "T04",
+          "title": "Badge acessível de prazo na linha",
+          "description": "DeadlineBadge com texto + ícone, integração na TaskRow, anúncio TalkBack junto ao título, ícones locais e testes de semântica.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/ui/designsystem/components/DeadlineBadge.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/designsystem/components/TaskRow.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/designsystem/icons/AppIcons.kt",
+            "app/src/main/res/values/strings.xml",
+            "app/src/test/java/com/foli/listadetarefas/architecture/ArchitectureRulesTest.kt",
+            "app/src/androidTest/java/com/foli/listadetarefas/accessibility/TaskRowSemanticsTest.kt"
+          ],
+          "acceptance_criteria": [
+            "Linha exibe no máximo um badge com texto + ícone quando há prazo",
+            "Tarefa concluída exibe 'Concluída em dd/MM/aaaa' e nunca o badge",
+            "TalkBack anuncia o estado de prazo junto ao título e nenhuma string visível fica hardcoded"
+          ],
+          "depends_on": [
+            "T02"
+          ],
+          "status": "released",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-05/tasks/T04/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-05/tasks/T04/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-05/tasks/T04/MR.md"
+        }
+      ],
       "plan_iterations": 0,
       "plan_path": ".squad/stories/US-05/TASK_PLAN.md",
       "plan_json": ".squad/stories/US-05/TASK_PLAN.json",
       "review_path": ".squad/stories/US-05/PLAN_REVIEW.md",
       "story_mr": ".squad/stories/US-05/MR.md",
-      "current_task": null
+      "current_task": "T01",
+      "dev_mode": "story_batch",
+      "code_review_path": ".squad/stories/US-05/CODE_REVIEW.md",
+      "brief_path": ".squad/stories/US-05/DEV_BRIEF.md"
     },
     {
       "id": "US-06",
@@ -382,14 +855,124 @@
         "A busca não altera, cria nem exclui dados",
         "O filtro permanece ativo ao abrir e fechar o formulário de criação/edição a partir da lista, e ao retornar o resultado já reflete a criação, edição, conclusão ou reabertura"
       ],
-      "status": "pending",
-      "tasks": [],
+      "status": "done",
+      "tasks": [
+        {
+          "id": "T01",
+          "title": "Filtro de busca no domínio",
+          "description": "TaskFilter.filterByQuery com substring no título OU descrição via TextNormalizer (trim, caixa e acentos), consulta vazia devolvendo a lista original na ordem recebida e testes JUnit de fronteira.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/domain/logic/TaskFilter.kt",
+            "app/src/test/java/com/foli/listadetarefas/domain/logic/TaskFilterTest.kt"
+          ],
+          "acceptance_criteria": [
+            "Substring no título OU na descrição encontra a tarefa; texto sem correspondência é descartado",
+            "Comparação ignora caixa e acentos e remove espaços das extremidades da consulta",
+            "Consulta vazia ou só com espaços devolve todas as tarefas na ordem recebida (ordenação vigente preservada)",
+            "Caracteres especiais da consulta são tratados como literais e o filtro combinado com byTab respeita a aba",
+            "Filtro é função pura, sem I/O, sem Android e sem alterar os dados"
+          ],
+          "depends_on": [],
+          "status": "released",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-06/tasks/T01/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-06/tasks/T01/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-06/tasks/T01/MR.md"
+        },
+        {
+          "id": "T02",
+          "title": "MVI da busca com persistência e analytics",
+          "description": "query no TaskListState, QueryChanged/SearchCleared, consulta no SavedStateHandle, projeção aba+filtro+ordenação em toda emissão do Room, search_performed com debounce de 200 ms e search_cleared sem PII; testes de ViewModel com Turbine.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListState.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListAction.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListViewModel.kt",
+            "app/src/test/java/com/foli/listadetarefas/testing/TaskFakes.kt",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListSearchTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListViewModelTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListCompletionTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListDeadlineTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListDeleteTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListLabelTest.kt"
+          ],
+          "acceptance_criteria": [
+            "QueryChanged atualiza rows imediatamente durante a digitação, sem ação de confirmar",
+            "Consulta vazia ou limpa restaura a lista completa da aba atual mantendo a ordenação vigente",
+            "O filtro atua apenas na aba visível; trocar de aba preserva a consulta e a reaplica",
+            "A consulta sobrevive à navegação para o formulário e a recriação do ViewModel via SavedStateHandle",
+            "Novas emissões do Room (criação, edição, conclusão, reabertura) são reprojetadas com o filtro ativo",
+            "Analytics emite search_performed só após 200 ms de debounce com result_count e search_cleared com had_query, sem o texto consultado"
+          ],
+          "depends_on": [
+            "T01"
+          ],
+          "status": "released",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-06/tasks/T02/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-06/tasks/T02/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-06/tasks/T02/MR.md"
+        },
+        {
+          "id": "T03",
+          "title": "SearchField e EmptyState de busca no design system",
+          "description": "SearchField compacto com placeholder, lupa e limpar de 48dp; AppIcons.Search; EmptyState com eco da consulta truncado visualmente e contentDescription integral; ação tonal; strings da busca.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/ui/designsystem/components/SearchField.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/designsystem/components/EmptyState.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/designsystem/icons/AppIcons.kt",
+            "app/src/main/res/values/strings.xml"
+          ],
+          "acceptance_criteria": [
+            "SearchField usa shape full, container surfaceContainerHigh, placeholder em recurso e lupa decorativa",
+            "A ação de limpar só aparece com consulta não vazia, tem alvo de 48dp e contentDescription 'Limpar busca'",
+            "EmptyState aceita eco opcional exibido em bodyMedium com maxLines = 2 e Ellipsis, mas anuncia a consulta integral em contentDescription",
+            "EmptyState suporta ação tonal exigida pelo 'Limpar busca' sem alterar os empties existentes",
+            "Strings search_placeholder, search_clear, empty_search_title, empty_search_echo e empty_search_body em recursos"
+          ],
+          "depends_on": [],
+          "status": "released",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-06/tasks/T03/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-06/tasks/T03/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-06/tasks/T03/MR.md"
+        },
+        {
+          "id": "T04",
+          "title": "Integração da busca na S1, acessibilidade e gate",
+          "description": "SearchField sempre visível acima das abas, empty de busca com prioridade, FAB oculto apenas no empty real da lista ativa, wiring Route/Screen, gate de strings US-06 e teste instrumentado de semântica.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListScreen.kt",
+            "app/src/test/java/com/foli/listadetarefas/architecture/ArchitectureRulesTest.kt",
+            "app/src/androidTest/java/com/foli/listadetarefas/accessibility/SearchFieldSemanticsTest.kt"
+          ],
+          "acceptance_criteria": [
+            "Busca, abas e app bar permanecem renderizados em todos os estados de S1 (lista, vazio, busca sem resultado, erro)",
+            "Sem resultados com consulta ativa exibe empty de busca contendo o texto buscado e a ação 'Limpar busca', com prioridade sobre o empty da aba",
+            "Limpar a busca pela ação do empty restaura a lista completa da aba atual",
+            "FAB só é ocultado no empty real da lista ativa sem consulta",
+            "Gate de arquitetura exige as strings da US-06 e libera search_placeholder do gate da US-01",
+            "Teste instrumentado cobre contentDescription do limpar e o eco integral; checklist manual de TalkBack/200%/48dp registrado no IMPLEMENTATION.md"
+          ],
+          "depends_on": [
+            "T02",
+            "T03"
+          ],
+          "status": "released",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-06/tasks/T04/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-06/tasks/T04/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-06/tasks/T04/MR.md"
+        }
+      ],
       "plan_iterations": 0,
       "plan_path": ".squad/stories/US-06/TASK_PLAN.md",
       "plan_json": ".squad/stories/US-06/TASK_PLAN.json",
       "review_path": ".squad/stories/US-06/PLAN_REVIEW.md",
       "story_mr": ".squad/stories/US-06/MR.md",
-      "current_task": null
+      "current_task": "T01",
+      "dev_mode": "story_batch",
+      "code_review_path": ".squad/stories/US-06/CODE_REVIEW.md",
+      "brief_path": ".squad/stories/US-06/DEV_BRIEF.md"
     },
     {
       "id": "US-07",
@@ -407,15 +990,135 @@
         "A ordenação é aplicada de forma consistente nas abas 'Ativas' e 'Concluídas'",
         "A opção selecionada fica visível (nome da ordenação atual) enquanto a lista é exibida"
       ],
-      "status": "pending",
-      "tasks": [],
+      "status": "done",
+      "tasks": [
+        {
+          "id": "T01",
+          "title": "Domínio da ordenação",
+          "description": "Criar SortOrder com as 6 opções e reescrever TaskSorter para ordenar por título (caixa/acentos ignorados), criação e prazo, com nulos ao final e desempates determinísticos; ObserveTasksUseCase passa a entregar a lista crua para a projeção.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/domain/model/SortOrder.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/logic/TaskSorter.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/usecase/task/ObserveTasksUseCase.kt",
+            "app/src/test/java/com/foli/listadetarefas/domain/logic/TaskSorterTest.kt"
+          ],
+          "acceptance_criteria": [
+            "As 6 opções existem no domínio (TITLE_ASC, TITLE_DESC, CREATED_DESC, CREATED_ASC, DEADLINE_ASC, DEADLINE_DESC), sem Android",
+            "Título ignora caixa e acentos (pt-BR) e desempata por criação mais recente (AC 5)",
+            "Criação usa createdAt, independente de completedAt/edição (AC 6)",
+            "Prazo coloca tarefas sem data sempre ao final nas duas direções, com desempate por criação mais recente (AC 7)",
+            "Desempate final determinístico por id; testes JUnit cobrem as 6 ordens e fronteiras"
+          ],
+          "depends_on": [],
+          "status": "released",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-07/tasks/T01/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-07/tasks/T01/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-07/tasks/T01/MR.md"
+        },
+        {
+          "id": "T02",
+          "title": "Persistência da ordenação em DataStore",
+          "description": "Adicionar sortOrder a UserPreferences, chave sort_order no DataStore, mapper tolerante, contrato e SetSortOrderUseCase.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/domain/model/UserPreferences.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/repository/PreferencesRepository.kt",
+            "app/src/main/java/com/foli/listadetarefas/domain/usecase/preferences/SetSortOrderUseCase.kt",
+            "app/src/main/java/com/foli/listadetarefas/data/local/preferences/UserPreferencesDataSource.kt",
+            "app/src/main/java/com/foli/listadetarefas/data/mapper/PreferencesMapper.kt",
+            "app/src/main/java/com/foli/listadetarefas/data/repository/PreferencesRepositoryImpl.kt",
+            "app/src/test/java/com/foli/listadetarefas/data/mapper/PreferencesMapperTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/testing/TaskFakes.kt"
+          ],
+          "acceptance_criteria": [
+            "sort_order é persistido em DataStore com default CREATED_DESC (AC 2, AC 4)",
+            "Valor ausente ou desconhecido cai no default sem exceção",
+            "Escrita ocorre fora da main thread via IoDispatcher",
+            "Preferência fica disponível por injeção Hilt (contrato + use case + impl)"
+          ],
+          "depends_on": [
+            "T01"
+          ],
+          "status": "released",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-07/tasks/T02/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-07/tasks/T02/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-07/tasks/T02/MR.md"
+        },
+        {
+          "id": "T03",
+          "title": "MVI da S1 com ordenação",
+          "description": "Adicionar sortOrder ao estado, ação SortOrderSelected, combinar preferências e projetar byTab -> busca -> TaskSorter.sort, persistindo e emitindo sort_changed; atualizar os testes de ViewModel.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListState.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListAction.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListViewModel.kt",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListSortTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListViewModelTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListCompletionTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListDeadlineTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListDeleteTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListLabelTest.kt",
+            "app/src/test/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListSearchTest.kt"
+          ],
+          "acceptance_criteria": [
+            "sortOrder no estado com default CREATED_DESC (AC 2)",
+            "SortOrderSelected reordena imediatamente as linhas mantendo a busca ativa (AC 3)",
+            "A ordenação persistida é restaurada ao recriar o app/ViewModel (AC 4)",
+            "A projeção aplica a ordenação em Ativas e Concluídas (AC 8)",
+            "sort_changed é emitido com sort_order (sem PII) e o retry/refresh preserva a ordem"
+          ],
+          "depends_on": [
+            "T01",
+            "T02"
+          ],
+          "status": "released",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-07/tasks/T03/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-07/tasks/T03/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-07/tasks/T03/MR.md"
+        },
+        {
+          "id": "T04",
+          "title": "Controle e sheet S5 na S1",
+          "description": "Criar SortControl (até 2 linhas, nome atual acessível) e TaskSortSheet (6 opções em radio), integrar ao chrome da S1, adicionar strings, gate da US-07 e teste instrumentado de semântica.",
+          "files": [
+            "app/src/main/java/com/foli/listadetarefas/ui/designsystem/components/SortControl.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/components/TaskSortSheet.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/SortOrderLabel.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/feature/tasks/presentation/TaskListScreen.kt",
+            "app/src/main/java/com/foli/listadetarefas/ui/designsystem/icons/AppIcons.kt",
+            "app/src/main/res/values/strings.xml",
+            "app/src/test/java/com/foli/listadetarefas/architecture/ArchitectureRulesTest.kt",
+            "app/src/androidTest/java/com/foli/listadetarefas/accessibility/SortControlSemanticsTest.kt"
+          ],
+          "acceptance_criteria": [
+            "Controle de ordenação sempre visível na S1, com até 2 linhas e contentDescription com o nome completo (AC 1, AC 9)",
+            "Sheet com as 6 opções em radio e a vigente marcada; escolher aplica na hora (AC 1, AC 3)",
+            "Chrome preservado na lista, estados vazios, busca sem resultado e erro (AC 8)",
+            "Strings da US-07 em recursos; gate de arquitetura exige as chaves e não as bloqueia nas histórias anteriores",
+            "Teste instrumentado cobre o contentDescription do controle e a semântica de seleção"
+          ],
+          "depends_on": [
+            "T03"
+          ],
+          "status": "released",
+          "iterations": 0,
+          "implementation_path": ".squad/stories/US-07/tasks/T04/IMPLEMENTATION.md",
+          "review_path": ".squad/stories/US-07/tasks/T04/CHAOS_REVIEW.md",
+          "mr_path": ".squad/stories/US-07/tasks/T04/MR.md"
+        }
+      ],
       "plan_iterations": 0,
       "plan_path": ".squad/stories/US-07/TASK_PLAN.md",
       "plan_json": ".squad/stories/US-07/TASK_PLAN.json",
       "review_path": ".squad/stories/US-07/PLAN_REVIEW.md",
       "story_mr": ".squad/stories/US-07/MR.md",
-      "current_task": null
+      "current_task": "T01",
+      "dev_mode": "story_batch",
+      "code_review_path": ".squad/stories/US-07/CODE_REVIEW.md",
+      "brief_path": ".squad/stories/US-07/DEV_BRIEF.md"
     }
   ],
-  "current_story": "US-01"
+  "current_story": null
 }

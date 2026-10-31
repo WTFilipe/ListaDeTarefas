@@ -4,10 +4,10 @@
   "title": "App de lista de tarefas com labels e prazos",
   "request_path": ".squad/artifacts/product/REQUEST.md",
   "created_at": "2026-10-29T23:01:28Z",
-  "updated_at": "2026-10-30T01:28:12Z",
-  "phase": "development",
-  "active_persona": "developer",
-  "status": "in_progress",
+  "updated_at": "2026-10-31T00:35:02Z",
+  "phase": "release",
+  "active_persona": "orchestrator",
+  "status": "done",
   "human_action_required": {
     "required": false,
     "scope": null,
@@ -126,27 +126,36 @@
       "title": "Chaos Dev",
       "path": ".squad/artifacts/development/CHAOS_REVIEW.md",
       "phase": "dev_review",
-      "status": "pending",
-      "summary": "",
-      "updated_at": null
+      "status": "approved",
+      "summary": "CODE_REVIEW US-04 v1 aprovado com 7 minors",
+      "updated_at": "2026-10-30T22:00:10Z"
     },
     "mr": {
       "key": "mr",
       "title": "Merge Request",
       "path": ".squad/artifacts/release/MR.md",
       "phase": "release",
-      "status": "pending",
-      "summary": "",
-      "updated_at": null
+      "status": "approved",
+      "summary": "US-07: MRs #8-#12 abertos (tarefas empilhadas + integracao squad/us-07 -> squad/us-06), sem merge",
+      "updated_at": "2026-10-31T00:35:01Z"
     },
     "traceability": {
       "key": "traceability",
       "title": "Rastreabilidade",
       "path": ".squad/artifacts/traceability/TRACEABILITY.md",
       "phase": "release",
-      "status": "in_progress",
-      "summary": "7 história(s); 7 sem implementação; 7 sem MR.",
-      "updated_at": "2026-10-30T01:28:07Z"
+      "status": "approved",
+      "summary": "7 historias; 0 sem implementacao; 0 sem MR.",
+      "updated_at": "2026-10-31T00:35:02Z"
+    },
+    "plan_gate": {
+      "key": "plan_gate",
+      "title": "Plan Gate",
+      "path": ".squad/artifacts/plan_gate/PLAN_REVIEW.md",
+      "phase": "architecture_review",
+      "status": "approved",
+      "summary": "Aprovações legadas preservadas.",
+      "updated_at": "2026-10-30T21:42:14Z"
     }
   },
   "history": [
@@ -237,6 +246,236 @@
       "action": "approved",
       "artifact": ".squad/artifacts/architecture/CHAOS_REVIEW.md",
       "summary": "Arquitetura aprovada; inicio do desenvolvimento US-01"
+    },
+    {
+      "at": "2026-10-30T21:42:14Z",
+      "phase": "development",
+      "persona": "orchestrator",
+      "action": "migrate_v2",
+      "artifact": ".squad/MIGRATION.md",
+      "summary": "Execução migrada para o fluxo v2 sem apagar o progresso."
+    },
+    {
+      "at": "2026-10-30T21:42:40Z",
+      "phase": "development",
+      "persona": "angel",
+      "action": "released",
+      "artifact": ".squad/stories/US-03/MR.md",
+      "summary": "US-03 done: MR #4 aberto (squad/us-03 -> squad/us-02), sem merge"
+    },
+    {
+      "at": "2026-10-30T21:43:53Z",
+      "phase": "development",
+      "persona": "orchestrator",
+      "action": "repair",
+      "artifact": ".squad/artifacts/product/STORIES.json",
+      "summary": "STORIES.json restaurado apos merge do Angel sobrescrever status (US-01/US-02/US-03 done, tarefas released)"
+    },
+    {
+      "at": "2026-10-30T21:44:25Z",
+      "phase": "development",
+      "persona": "orchestrator",
+      "action": "repair",
+      "artifact": ".squad/state.json",
+      "summary": "state/config restaurados apos merge (profile standard, base master, gates code US-01/02/03 approved, dev_review approved); historico anterior a 21:42 recuperado parcialmente"
+    },
+    {
+      "at": "2026-10-30T21:45:29Z",
+      "phase": "development",
+      "persona": "orchestrator",
+      "action": "delegate",
+      "artifact": ".squad/stories/US-04/DEV_BRIEF.md",
+      "summary": "US-04: brief gerado, Developer em lote"
+    },
+    {
+      "at": "2026-10-30T22:04:21Z",
+      "phase": "development",
+      "persona": "orchestrator",
+      "action": "human_decision",
+      "artifact": ".squad/human/decision.json",
+      "summary": "US-04 aprovada pelo humano (approve_story); segue para Angel"
+    },
+    {
+      "at": "2026-10-30T22:06:49Z",
+      "phase": "development",
+      "persona": "angel",
+      "action": "released",
+      "artifact": ".squad/stories/US-04/MR.md",
+      "summary": "US-04 done: MR #5 aberto (squad/us-04 -> squad/us-03), sem merge"
+    },
+    {
+      "at": "2026-10-30T22:22:08Z",
+      "phase": "development",
+      "persona": "orchestrator",
+      "action": "followups",
+      "artifact": ".squad/FOLLOWUPS.md",
+      "summary": "US-05 Code Gate aprovado com minima (M1-M6) em FOLLOWUPS; historia awaiting_approval"
+    },
+    {
+      "at": "2026-10-30T22:25:18Z",
+      "phase": "development",
+      "persona": "orchestrator",
+      "action": "human_decision",
+      "artifact": ".squad/human/decision.json",
+      "summary": "US-05 aprovada pelo humano (approve_story); segue para Angel"
+    },
+    {
+      "at": "2026-10-30T22:27:34Z",
+      "phase": "development",
+      "persona": "angel",
+      "action": "released",
+      "artifact": ".squad/stories/US-05/MR.md",
+      "summary": "US-05 done: MR #6 aberto (squad/us-05 -> squad/us-04), sem merge"
+    },
+    {
+      "at": "2026-10-30T22:49:36Z",
+      "phase": "development",
+      "persona": "orchestrator",
+      "action": "delegate",
+      "artifact": ".squad/stories/US-06/DEV_BRIEF.md",
+      "summary": "US-06: brief gerado, Developer em lote"
+    },
+    {
+      "at": "2026-10-30T23:01:37Z",
+      "phase": "development",
+      "persona": "orchestrator",
+      "action": "human_decision",
+      "artifact": ".squad/human/decision.json",
+      "summary": "US-06 aprovada pelo humano (approve_story); segue para Angel"
+    },
+    {
+      "at": "2026-10-30T23:05:00Z",
+      "phase": "development",
+      "persona": "angel",
+      "action": "released",
+      "artifact": ".squad/stories/US-06/MR.md",
+      "summary": "US-06 done: MR #7 aberto (squad/us-06 -> squad/us-05), sem merge"
+    },
+    {
+      "at": "2026-10-30T23:06:11Z",
+      "phase": "development",
+      "persona": "orchestrator",
+      "action": "delegate",
+      "artifact": ".squad/stories/US-07/DEV_BRIEF.md",
+      "summary": "US-07: brief gerado, Developer em lote"
+    },
+    {
+      "at": "2026-10-30T23:19:20Z",
+      "phase": "development",
+      "persona": "orchestrator",
+      "action": "delegate",
+      "artifact": ".squad/stories/US-07/CODE_REVIEW.md",
+      "summary": "US-07 implementada em lote; Code Gate em revisão"
+    },
+    {
+      "at": "2026-10-30T23:30:42Z",
+      "phase": "development",
+      "persona": "orchestrator",
+      "action": "followups",
+      "artifact": ".squad/FOLLOWUPS.md",
+      "summary": "US-07 Code Gate aprovado com minors M1-M6 em FOLLOWUPS; historia awaiting_approval, aguardando aprovacao humana"
+    },
+    {
+      "at": "2026-10-30T23:38:38Z",
+      "phase": "development",
+      "persona": "orchestrator",
+      "action": "human_decision",
+      "artifact": ".squad/human/DECISION.md",
+      "summary": "US-07: decisao humana request_changes com M1-M6 aceitos para correcao; volta ao Developer"
+    },
+    {
+      "at": "2026-10-31T00:10:27Z",
+      "phase": "development",
+      "persona": "orchestrator",
+      "action": "resume",
+      "artifact": ".squad/history/20261031T001001Z",
+      "summary": "Retomada apos decisao humana US-07 (request_changes); Developer vai corrigir M1-M6"
+    },
+    {
+      "at": "2026-10-31T00:15:50Z",
+      "phase": "development",
+      "persona": "orchestrator",
+      "action": "delegate",
+      "artifact": ".squad/stories/US-07/CODE_REVIEW.md",
+      "summary": "US-07 corrigida (M1-M6) e build/testes verdes; Code Gate r2 em revisao"
+    },
+    {
+      "at": "2026-10-31T00:20:44Z",
+      "phase": "development",
+      "persona": "orchestrator",
+      "action": "gate",
+      "artifact": ".squad/stories/US-07/CODE_REVIEW.md",
+      "summary": "Code Gate r2 aprovado com minors N1-N3; US-07 awaiting_approval; gate humano story_approval aberto"
+    },
+    {
+      "at": "2026-10-31T00:27:57Z",
+      "phase": "development",
+      "persona": "orchestrator",
+      "action": "human_decision",
+      "artifact": ".squad/human/decision.json",
+      "summary": "US-07 aprovada pelo humano (approve_story); segue para Angel"
+    },
+    {
+      "at": "2026-10-31T00:35:02Z",
+      "phase": "release",
+      "persona": "angel",
+      "action": "released",
+      "artifact": ".squad/stories/US-07/MR.md",
+      "summary": "US-07 done: MRs #8-#12 abertos (tarefas stacked + integracao squad/us-07 -> squad/us-06), sem merge"
     }
-  ]
+  ],
+  "flow_version": 2,
+  "profile": "standard",
+  "gates": {
+    "plan": {
+      "status": "approved",
+      "iterations": 0,
+      "review_path": ".squad/artifacts/plan_gate/PLAN_REVIEW.md",
+      "summary": "Aprovações legadas preservadas."
+    },
+    "code": {
+      "US-01": {
+        "status": "approved",
+        "iterations": 2,
+        "review_path": ".squad/stories/US-01/CODE_REVIEW.md",
+        "summary": "Code Gate r2: aprovado com minors CG-10/CG-11 em FOLLOWUPS"
+      },
+      "US-02": {
+        "status": "approved",
+        "iterations": 1,
+        "review_path": ".squad/stories/US-02/CODE_REVIEW.md",
+        "summary": "Code Gate r1: aprovado com minors CG2-01/CG2-02 em FOLLOWUPS"
+      },
+      "US-03": {
+        "status": "approved",
+        "iterations": 1,
+        "review_path": ".squad/stories/US-03/CODE_REVIEW.md",
+        "summary": "Code Gate r1: aprovado com minors CG3-01..CG3-04 em FOLLOWUPS"
+      },
+      "US-04": {
+        "status": "approved",
+        "iterations": 0,
+        "review_path": ".squad/stories/US-04/CODE_REVIEW.md",
+        "summary": "Code Gate r1: aprovado com 7 minors M1-M7 em FOLLOWUPS"
+      },
+      "US-05": {
+        "status": "approved",
+        "iterations": 0,
+        "review_path": ".squad/stories/US-05/CODE_REVIEW.md"
+      },
+      "US-06": {
+        "status": "approved",
+        "iterations": 0,
+        "review_path": ".squad/stories/US-06/CODE_REVIEW.md",
+        "summary": "Code Gate r1: aprovado com 5 minors em FOLLOWUPS"
+      },
+      "US-07": {
+        "status": "approved",
+        "iterations": 0,
+        "review_path": ".squad/stories/US-07/CODE_REVIEW.md",
+        "summary": "Code Gate r2: aprovado com minors N1-N3 em FOLLOWUPS"
+      }
+    }
+  },
+  "needs_stories": false
 }
