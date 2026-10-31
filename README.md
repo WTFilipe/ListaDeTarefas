@@ -145,20 +145,20 @@ design system local.
 
 O desenvolvimento foi conduzido em histórias (`US-01` a `US-07`) em branches
 `squad/*`, com MRs empilhados (um por tarefa + um de integração por história).
-Todo o trabalho está consolidado em `master`:
+Todo o trabalho está consolidado na branch `main`:
 
 | História | Escopo | Situação |
 |:--|:--|:--|
-| US-01 | CRUD de tarefas com persistência | Integrada em `master` (PR #1) |
-| US-02 | Limites e contadores de texto | Integrada em `master` (PR #2) |
-| US-03 | Conclusão e aba Concluídas | Integrada em `master` |
-| US-04 | Etiquetas com paleta fixa | Integrada em `master` |
-| US-05 | Data limite e indicador de prazo | Integrada em `master` |
-| US-06 | Busca por título e descrição | Integrada em `master` |
-| US-07 | Ordenação da lista | Integrada em `master` |
+| US-01 | CRUD de tarefas com persistência | Integrada em `main` (PR #1) |
+| US-02 | Limites e contadores de texto | Integrada em `main` (PR #2) |
+| US-03 | Conclusão e aba Concluídas | Integrada em `main` |
+| US-04 | Etiquetas com paleta fixa | Integrada em `main` |
+| US-05 | Data limite e indicador de prazo | Integrada em `main` |
+| US-06 | Busca por título e descrição | Integrada em `main` |
+| US-07 | Ordenação da lista | Integrada em `main` |
 
-As branches `squad/*` e os MRs (#4 a #12) ficam como registro do processo; a
-`master` é a fonte de verdade do código e do README.
+O histórico dos MRs (#1 a #13) fica como registro do processo; a `main` é a fonte
+de verdade do código e do README.
 
 ## Privacidade
 
